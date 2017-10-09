@@ -20,19 +20,19 @@ logos:
   url: http://gearpump.apache.org/  
 
 pillars:
-- title: Unified
-  body: Use a single programming model for both batch and streaming use cases.
-- title: Portable
-  body: Execute pipelines on multiple execution environments.
-- title: Extensible
-  body: Write and share new SDKs, IO connectors, and transformation libraries.
+- title: Unified（统一性）
+  body: 针对批处理和流式处理, 都使用了单个的编程模型.
+- title: Portable（可移植性）
+  body: 在多个执行环境中执行 pipelines（管道）.
+- title: Extensible（可扩展性）
+  body: Write 和共享新的 SDKs, IO connectors 以及 transformation libraries.
 
 cards:
-- quote: "A framework that delivers the flexibility and advanced functionality our customers need."
+- quote: "提供了客户所需的灵活性以及一些高级功能的框架."
   name: –Talend
-- quote: "Apache Beam has powerful semantics that solve real-world challenges of stream processing."
+- quote: "Apache Beam 有强大的语义支持, 它解决了流式处理工作上的挑战."
   name: –PayPal
-- quote: "Apache Beam represents a principled approach for analyzing data streams."
+- quote: "Apache Beam 代表分析数据流的原则性方法."
   name: –data Artisans
 ---
 <div class="hero-bg">
@@ -41,24 +41,24 @@ cards:
       <div class="hero__cols__col">
         <div class="hero__cols__col__content">
           <div class="hero__title">
-            Apache Beam: An advanced unified programming model
+            Apache Beam: 一个高级且统一的编程模型
           </div>
           <div class="hero__subtitle">
-            Implement batch and streaming data processing jobs that run on any execution engine.
+            让批处理和流数据处理的作业在任何执行引擎上都可以运行.
           </div>
           <div class="hero__ctas hero__ctas--first">
-            <a class="button button--primary" href="{{'/get-started/beam-overview/'|prepend:site.baseurl}}">Learn more</a>
+            <a class="button button--primary" href="{{'/get-started/beam-overview/'|prepend:site.baseurl}}">了解更多</a>
           </div>
           <div class="hero__ctas">
-            <a class="button" href="{{'/get-started/quickstart-java/'|prepend:site.baseurl}}">Java Quickstart</a>
-            <a class="button" href="{{'/get-started/quickstart-py/'|prepend:site.baseurl}}">Python Quickstart</a>
+            <a class="button" href="{{'/get-started/quickstart-java/'|prepend:site.baseurl}}">Java 快速入门</a>
+            <a class="button" href="{{'/get-started/quickstart-py/'|prepend:site.baseurl}}">Python 快速入门</a>
           </div>
         </div>
       </div>
       <div class="hero__cols__col">
         <div class="hero__blog">
           <div class="hero__blog__title">
-            The latest from the blog
+            最新的博客
           </div>
           <div class="hero__blog__cards">
             {% for post in site.posts limit:3 %}
@@ -76,7 +76,7 @@ cards:
 
 <div class="pillars section">
   <div class="pillars__title">
-    All about Apache Beam
+    关于 Apache Beam
   </div>
   <div class="pillars__cols">
     {% for pillar in page.pillars %}
@@ -100,7 +100,7 @@ cards:
 
 <div class="logos section">
   <div class="logos__title">
-    Works with
+    适用于
   </div>
   <div class="logos__logos">
     {% for logo in page.logos %}
@@ -114,7 +114,7 @@ cards:
 <div class="cards section section--wide">
   <div class="section__contained">
     <div class="cards__title">
-      Testimonials
+      客户评价
     </div>
     <div class="cards__cards">
       {% for card in page.cards %}
@@ -135,21 +135,21 @@ cards:
       {% endfor %}
     </div>
     <div class="cards__body">
-      Beam is an open source community and contributions are greatly appreciated!
-      If you’d like to contribute, please see the <a href="{{'/contribute/'|prepend:site.baseurl}}">Contribute</a> section.
+      Beam 是一个开源社区,  非常感谢大家的贡献!
+      如果您想要参与贡献, 请参阅 <a href="{{'/contribute/'|prepend:site.baseurl}}">贡献</a> 部分.
     </div>
   </div>
 </div>
 
 <div class="ctas section">
   <div class="ctas__title">
-    Get started
+    入门指南
   </div>
   <div class="ctas__ctas ctas__ctas--top">
-  <a class="button button--primary" href="{{'/get-started/beam-overview/'|prepend:site.baseurl}}">Learn more</a>
+  <a class="button button--primary" href="{{'/get-started/beam-overview/'|prepend:site.baseurl}}">了解更多</a>
   </div>
   <div class="ctas__ctas">
-  <a class="button" href="{{'/get-started/quickstart-java/'|prepend:site.baseurl}}">Java Quickstart</a>
-  <a class="button" href="{{'/get-started/quickstart-py/'|prepend:site.baseurl}}">Python Quickstart</a>
+  <a class="button" href="{{'/get-started/quickstart-java/'|prepend:site.baseurl}}">Java 快速入门</a>
+  <a class="button" href="{{'/get-started/quickstart-py/'|prepend:site.baseurl}}">Python 快速入门</a>
   </div>
 </div>
