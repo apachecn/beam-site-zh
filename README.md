@@ -14,8 +14,8 @@ ApacheCN: http://beam.apachecn.org/
 工欲善其事, 必先利其器 ...  
 工具随意, 能达到效果就好.  
 我这里使用的是 `VSCode` 编辑器.  
-简易的使用指南请参阅: [VSCode Windows 平台入门使用指南](help/vscode-windows-usage.md), 介绍了 `VSCode` 与 `github` 一起搭配的简易使用的方法.  
-如果要将 VSCode 的 Markdown 预览风格切换为 github 的风格，请参阅: [VSCode 修改 markdown 的预览风格为 github 的风格](help/vscode-markdown-preview-github-style.md).
+简易的使用指南请参阅: [VSCode Windows 平台入门使用指南](https://github.com/apachecn/spark-doc-zh/blob/master/help/vscode-windows-usage.md), 介绍了 `VSCode` 与 `github` 一起搭配的简易使用的方法.  
+如果要将 VSCode 的 Markdown 预览风格切换为 github 的风格，请参阅: [VSCode 修改 markdown 的预览风格为 github 的风格](https://github.com/apachecn/spark-doc-zh/blob/master/help/vscode-markdown-preview-github-style.md).
 
 ## 翻译流程
 请参阅: [翻译流程的详细操作](project/translate-flow.md)。
