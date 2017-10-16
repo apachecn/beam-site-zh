@@ -7,15 +7,15 @@ redirect_from:
   - /capability-matrix/
 ---
 
-# Beam Capability Matrix
-Apache Beam提供了一个可移植的API层，用于构建复杂的数据并行处理流水线，可以在多种执行引擎或<i>runners</i>之间执行。该层的核心概念基于Beam Model (以前称为 [Dataflow Model](http://www.vldb.org/pvldb/vol8/p1792-Akidau.pdf)), 并在不同程度上实现了每个Beam runner. 为了帮助说明每个runners的capabilities，我们创建了以下capability matrix.
+# Beam 功能 矩阵
+Apache Beam提供了一个可移植的API层，用于构建复杂的，可以在多种执行引擎或<i>runners</i>之间执行的数据并行处理流水线。该层的核心概念基于Beam Model (以前称为 [Dataflow Model](http://www.vldb.org/pvldb/vol8/p1792-Akidau.pdf)), 并在不同程度上实现了每个Beam runner. 为了帮助说明每个runners的功能，我们创建了以下功能矩阵.
 
-个别的capabilities已经按照相应的 <span class="wwwh-what-dark">What</span> / <span class="wwwh-where-dark">Where</span> / <span class="wwwh-when-dark">When</span> / <span class="wwwh-how-dark">How</span> 问题分组:
+每个独立的功能都已按照相应的 <span class="wwwh-what-dark">What</span> / <span class="wwwh-where-dark">Where</span> / <span class="wwwh-when-dark">When</span> / <span class="wwwh-how-dark">How</span> 问题分组:
 
-- <span class="wwwh-what-dark">What</span> results are being calculated?
-- <span class="wwwh-where-dark">Where</span> in event time?
-- <span class="wwwh-when-dark">When</span> in processing time?
-- <span class="wwwh-how-dark">How</span> do refinements of results relate?
+- <span class="wwwh-what-dark">What</span> 对数据的处理是哪种类型?
+- <span class="wwwh-when-dark">Where</span> 数据在什么范围中计算?
+- <span class="wwwh-when-dark">When</span> 何时将计算结果输出?
+- <span class="wwwh-how-dark">How</span> 延迟数据如何处理?
 
 关于 <span class="wwwh-what-dark">What</span> / <span class="wwwh-where-dark">Where</span> / <span class="wwwh-when-dark">When</span> / <span class="wwwh-how-dark">How</span> 概念的更多细节, 我们建议阅读 O'Reilly Radar上的<a href="http://oreilly.com/ideas/the-world-beyond-batch-streaming-102">Streaming 102</a> 帖子.
 
