@@ -8,18 +8,18 @@ redirect_from:
 ---
 
 # Beam Capability Matrix
-Apache Beam provides a portable API layer for building sophisticated data-parallel processing pipelines that may be executed across a diversity of execution engines, or <i>runners</i>. The core concepts of this layer are based upon the Beam Model (formerly referred to as the [Dataflow Model](http://www.vldb.org/pvldb/vol8/p1792-Akidau.pdf)), and implemented to varying degrees in each Beam runner. To help clarify the capabilities of individual runners, we've created the capability matrix below.
+Apache Beam提供了一个可移植的API层，用于构建复杂的数据并行处理流水线，可以在多种执行引擎或<i>runners</i>之间执行。该层的核心概念基于Beam Model (以前称为 [Dataflow Model](http://www.vldb.org/pvldb/vol8/p1792-Akidau.pdf)), 并在不同程度上实现了每个Beam runner. 为了帮助说明每个runners的capabilities，我们创建了以下capability matrix.
 
-Individual capabilities have been grouped by their corresponding <span class="wwwh-what-dark">What</span> / <span class="wwwh-where-dark">Where</span> / <span class="wwwh-when-dark">When</span> / <span class="wwwh-how-dark">How</span> question:
+个别的capabilities已经按照相应的 <span class="wwwh-what-dark">What</span> / <span class="wwwh-where-dark">Where</span> / <span class="wwwh-when-dark">When</span> / <span class="wwwh-how-dark">How</span> 问题分组:
 
 - <span class="wwwh-what-dark">What</span> results are being calculated?
 - <span class="wwwh-where-dark">Where</span> in event time?
 - <span class="wwwh-when-dark">When</span> in processing time?
 - <span class="wwwh-how-dark">How</span> do refinements of results relate?
 
-For more details on the <span class="wwwh-what-dark">What</span> / <span class="wwwh-where-dark">Where</span> / <span class="wwwh-when-dark">When</span> / <span class="wwwh-how-dark">How</span> breakdown of concepts, we recommend reading through the <a href="http://oreilly.com/ideas/the-world-beyond-batch-streaming-102">Streaming 102</a> post on O'Reilly Radar.
+关于 <span class="wwwh-what-dark">What</span> / <span class="wwwh-where-dark">Where</span> / <span class="wwwh-when-dark">When</span> / <span class="wwwh-how-dark">How</span> 概念的更多细节, 我们建议阅读 O'Reilly Radar上的<a href="http://oreilly.com/ideas/the-world-beyond-batch-streaming-102">Streaming 102</a> 帖子.
 
-Note that in the future, we intend to add additional tables beyond the current set, for things like runtime characterstics (e.g. at-least-once vs exactly-once), performance, etc.
+请注意，将来，我们打算在当前集合之外添加其他表，例如运行时特性（例如至少一次vs一次），性能等.
 
 {% include capability-matrix-common.md %}
 {% assign cap-data=site.data.capability-matrix %}
