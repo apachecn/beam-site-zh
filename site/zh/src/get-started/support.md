@@ -59,7 +59,7 @@ redirect_from:
 
 Apache Beam 项目使用 [JIRA](http://www.atlassian.com/software/jira) 对问题进行跟踪.
 
-项目中的问题, bugs及特性功能需求可以提交到如下跟踪系统。
+项目中的Issues问题, bugs及特性功能需求可以提交到如下跟踪系统。
 
 
 <code>
