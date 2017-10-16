@@ -13,7 +13,7 @@ Apache Beam提供了一个可移植的API层，用于构建复杂的，可以在
 每个独立的功能都已按照相应的 <span class="wwwh-what-dark">What</span> / <span class="wwwh-where-dark">Where</span> / <span class="wwwh-when-dark">When</span> / <span class="wwwh-how-dark">How</span> 问题分组:
 
 - <span class="wwwh-what-dark">What</span> 对数据的处理是哪种类型?
-- <span class="wwwh-when-dark">Where</span> 数据在什么范围中计算?
+- <span class="wwwh-where-dark">Where</span> 数据在什么范围中计算?
 - <span class="wwwh-when-dark">When</span> 何时将计算结果输出?
 - <span class="wwwh-how-dark">How</span> 延迟数据如何处理?
 
