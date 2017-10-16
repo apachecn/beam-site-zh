@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "Beam Releases"
+title: "Beam 发行版本"
 permalink: get-started/downloads/
 redirect_from:
   - /get-started/releases/
