@@ -9,7 +9,7 @@ redirect_from:
 
 # 技术支持
 
-下面章节，你可以找到不同的技术支持方案。
+本章节，您可以找到不同的技术支持方案。
 
 ## 邮件类表
 
@@ -59,7 +59,7 @@ redirect_from:
 
 Apache Beam 项目使用 [JIRA](http://www.atlassian.com/software/jira) 对问题进行跟踪.
 
-项目中的Issues问题, bugs及特性功能需求可以提交到如下跟踪系统。
+项目中的任何问题, bugs及新特性功能需求等可以提交到如下跟踪系统。
 
 
 <code>
