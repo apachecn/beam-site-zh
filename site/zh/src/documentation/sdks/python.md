@@ -1,36 +1,32 @@
-+---
- +layout: default
- +title: "Apache Beam Python SDK"
- +permalink: /documentation/sdks/python/
- +---
- +# Apache Beam Python SDK
- +
- +The Python SDK for Apache Beam provides a simple, powerful API for building batch data processing pipelines in Python.
- +Apache Beam Ìá¹©ÁËÒ»·İ¼òÃ÷¶óÒªµÄ¹¹½¨ÅúÁ¿Êı¾İ´¦Àí¹ÜµÀµÄPython API.
- +
- +## Get Started with the Python SDK
- +## ¿ªÊ¼ÄúµÄPython SDKÖ®ÂÃ°É
- +
- +Get started with the [Beam Programming Guide]({{ site.baseurl }}/documentation/programming-guide) to learn the basic concepts that apply to all SDKs in Beam. Then, follow the [Beam Python SDK Quickstart]({{ site.baseurl }}/get-started/quickstart-py) to set up your Python development environment, get the Beam SDK for Python, and run an example pipeline.
- +×ªµ½ [Beam ±à³ÌÖ¸ÄÏ]({{ site.baseurl }}/documentation/programming-guide) À´Ñ§Ï°Beam SDKÖĞ³öÏÖµÄ»ù´¡¸ÅÄî. ½ÓÏÂÀ´, ×ñÑ­[Beam Python SDK ¿ìËÙ¿ªÊ¼]({{ site.baseurl }}/get-started/quickstart-py) À´½¨Á¢ÄãµÄPython¿ª·¢»·¾³,´ï³ÉPythonµÄBeam SDK,ÔËĞĞÒ»¸ö¹ÜµÀµÄÀı×Ó°É.
- +
- +See the [Python API Reference]({{ site.baseurl }}/documentation/sdks/pydoc/) for more information on individual APIs.
- +²é¿´ [Python API Ö¸µ¼]({{ site.baseurl }}/documentation/sdks/pydoc/) À´»ñµÃ¸öÈËÏà¹ØµÄAPIµÄ¸ü¶àĞÅÏ¢.
- +
- +## Python Type Safety
- +## PythonÀàĞÍ°²È«
- +
- +Python is a dynamically-typed language with no static type checking. The Beam SDK for Python uses type hints during pipeline construction and runtime to try to emulate the correctness guarantees achieved by true static typing. [Ensuring Python Type Safety]({{ site.baseurl }}/documentation/sdks/python-type-safety) walks through how to use type hints, which help you to catch potential bugs up front with the [Direct Runner]({{ site.baseurl }}/documentation/runners/direct/).
- +PythonÊÇÒ»ÃÅµäĞÍµÄ·Ç¾²Ì¬ÓïÑÔ.ËûµÄBeam SDKÊ¹ÓÃ´úÂë±à¼­ÌáÊ¾À´±£Ö¤³ÌĞò¹ÜµÀÉè¼ÆºÍÔËĞĞÊ±³¢ÊÔ·ÂÕæÕıÈ·ĞÔÀ´Íê³É¾²Ì¬ÀàĞÍ. [PythonÀàĞÍ°²È«µÄ±£Ö¤]({{ site.baseurl }}/documentation/sdks/python-type-safety)ÊÇÍ¨¹ıÊ¹ÓÃ¼üÈëÌáÊ¾£¬ÄÜ°ïÖúÄãÔÚ[Ö±½ÓÔËĞĞ]({{ site.baseurl }}/documentation/runners/direct/)Ö®Ç°²¶»ñÇ±ÔÚµÄBUG.
- +
- +## Managing Python Pipeline Dependencies
- +## ¹ÜÀíÄãµÄPython¹ÜµÀ¸½¼ş
- +
- +When you run your pipeline locally, the packages that your pipeline depends on are available because they are installed on your local machine. However, when you want to run your pipeline remotely, you must make sure these dependencies are available on the remote machines. [Managing Python Pipeline Dependencies]({{ site.baseurl }}/documentation/sdks/python-pipeline-dependencies) shows you how to make your dependencies available to the remote workers.
- +µ±ÄãÔËĞĞÄã±¾µØµÄ¹ÜµÀÊ±£¬¹ÜµÀ¸½´øµÄ°ü¿ÉÒÔÊ¹ÓÃÊÇÓÉÓÚËûÃÇÔÚÄã±¾µØµÄ»úÆ÷ÉÏ°²×°¡£È»¶ø£¬µ±ÄãÏëÔ¶³ÌÔËĞĞÄãµÄ¹ÜµÀÊ±£¬Äã±ØĞëÈ·±£Ô¶³Ì»úÆ÷ÉÏÃæÍ¬ÑùÓĞ¸½´øµÄ°ü¡£[¹ÜÀíPython¹ÜµÀ¸½¼ş]({{ site.baseurl }}/documentation/sdks/python-pipeline-dependencies)½«Õ¹Ê¾ÄúÈçºÎÔÚÔ¶³Ì½ÚµãÉÏÈ·±£ÄãµÄÒÀÀµ°ü.
- +
- +## Creating New Sources and Sinks
- +## ´´½¨ĞÂµÄÔ´ÂëºÍ³Ø
- +
- +The Beam SDK for Python provides an extensible API that you can use to create new data sources and sinks. [Creating New Sources and Sinks with the Python SDK]({{ site.baseurl }}/documentation/sdks/python-custom-io) shows how to create new sources and sinks using [Beam's Source and Sink API](https://github.com/apache/beam/blob/master/sdks/python/apache_beam/io/iobase.py).
- +Beam SDK for PyhtonÌá¹©ÁËÒ»¸ö¿ÉÀ©Õ¹µÄAPIÀ´ÓÃÓÚ´´½¨ĞÂµÄÔ´ÂëºÍ³Ø.[ÓÉPython SDK´´½¨ĞÂµÄÔ´ÂëºÍ³Ø]({{ site.baseurl }}/documentation/sdks/python-custom-io) Õ¹Ê¾ÁËÈçºÎÊ¹ÓÃ [BeamµÄÔ´ÂëºÍ³ØAPI](https://github.com/apache/beam/blob/master/sdks/python/apache_beam/io/iobase.py)½¨Á¢ĞÂµÄÔ´ÂëºÍ³Ø.
+---
+layout: default
+title: "Apache Beam Python SDK"
+permalink: /documentation/sdks/python/
+---
+# Apache Beam Python SDK
+
+Apache Beam çš„ Python SDK æä¾›äº†ä¸€ä¸ªç®€å•è€Œå¼ºå¤§çš„ API, ç”¨äºåœ¨ Python ä¸­æ„å»ºæ‰¹æ•°æ®å¤„ç†çš„ pipelines.
+
+## Python SDK å…¥é—¨æŒ‡å—
+
+è½¬åˆ° [Beam ç¼–ç¨‹æŒ‡å—]({{ site.baseurl }}/documentation/programming-guide) æ¥å­¦ä¹  Beam SDK ä¸­å‡ºç°çš„åŸºç¡€æ¦‚å¿µ.
+æ¥ä¸‹æ¥, éµå¾ª[Beam Python SDK å¿«é€Ÿå…¥é—¨]({{ site.baseurl }}/get-started/quickstart-py) æ¥è®¾ç½®ä½ çš„ Python å¼€å‘ç¯å¢ƒ, è·å– Python çš„ Beam SDK, å¹¶ä¸”è¿è¡Œä¸€ä¸ª pipeline çš„ä¾‹å­.
+
+è¯·å‚é˜… [Python API å‚è€ƒ]({{ site.baseurl }}/documentation/sdks/pydoc/) æ¥è·å¾—ç›¸å…³ API çš„æ›´å¤šä¿¡æ¯.
+
+## Python ç±»å‹å®‰å…¨
+
+Python æ˜¯ä¸€ç§åŠ¨æ€ç±»å‹çš„è¯­è¨€, æ²¡æœ‰é™æ€ç±»å‹æ£€æŸ¥.
+ä»–çš„ Beam SDK ä½¿ç”¨ä»£ç ç¼–è¾‘æç¤ºæ¥ä¿è¯ç¨‹åºçš„ pipeline è®¾è®¡å’Œè¿è¡Œæ—¶å°è¯•ä»¿çœŸæ­£ç¡®æ€§æ¥å®Œæˆé™æ€ç±»å‹.
+[Python ç±»å‹å®‰å…¨çš„ä¿è¯]({{ site.baseurl }}/documentation/sdks/python-type-safety) æ˜¯é€šè¿‡ä½¿ç”¨é”®å…¥æç¤º, èƒ½å¸®åŠ©ä½ åœ¨ [ç›´æ¥è¿è¡Œ]({{ site.baseurl }}/documentation/runners/direct/) ä¹‹å‰æ•è·æ½œåœ¨çš„ BUG.
+
+## ç®¡ç† Python Pipeline ä¾èµ–
+
+å½“ä½ è¿è¡Œä½ æœ¬åœ°çš„ pipeline æ—¶, pipeline é™„å¸¦çš„åŒ…å¯ä»¥ä½¿ç”¨æ˜¯ç”±äºä»–ä»¬åœ¨ä½ æœ¬åœ°çš„æœºå™¨ä¸Šå®‰è£….
+ç„¶è€Œï¼Œå½“ä½ æƒ³è¿œç¨‹è¿è¡Œä½ çš„ pipeline æ—¶ï¼Œä½ å¿…é¡»ç¡®ä¿è¿œç¨‹æœºå™¨ä¸Šé¢åŒæ ·æœ‰é™„å¸¦çš„åŒ….
+[ç®¡ç† Python Pipeline é™„ä»¶]({{ site.baseurl }}/documentation/sdks/python-pipeline-dependencies) å°†å±•ç¤ºæ‚¨å¦‚ä½•åœ¨è¿œç¨‹èŠ‚ç‚¹ä¸Šç¡®ä¿ä½ çš„ä¾èµ–åŒ….
+
+## åˆ›å»ºæ–°çš„ Sources å’Œ Sinks
+Python çš„ Beam SDK æä¾›äº†ä¸€ä¸ªå¯æ‰©å±•çš„ API æ¥ç”¨äºåˆ›å»ºæ–°çš„ data sourcesï¼ˆæ•°æ®æºï¼‰å’Œ sinks.
+[ç”± Python SDK åˆ›å»ºæ–°çš„ data sources å’Œ sinks]({{ site.baseurl }}/documentation/sdks/python-custom-io) å±•ç¤ºäº†å¦‚ä½•ä½¿ç”¨ [Beam çš„ Source å’Œ Sink API](https://github.com/apache/beam/blob/master/sdks/python/apache_beam/io/iobase.py) æ¥åˆ›å»ºæ–°çš„ sources å’Œ sinks.
+
