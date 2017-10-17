@@ -7,19 +7,19 @@ redirect_from:
   - /capability-matrix/
 ---
 
-# Beam Capability Matrix
-Apache Beam provides a portable API layer for building sophisticated data-parallel processing pipelines that may be executed across a diversity of execution engines, or <i>runners</i>. The core concepts of this layer are based upon the Beam Model (formerly referred to as the [Dataflow Model](http://www.vldb.org/pvldb/vol8/p1792-Akidau.pdf)), and implemented to varying degrees in each Beam runner. To help clarify the capabilities of individual runners, we've created the capability matrix below.
+# Beam 功能 矩阵
+Apache Beam提供了一个可移植的API层，用于构建复杂的，可以在多种执行引擎或<i>runners</i>之间执行的数据并行处理流水线。该层的核心概念基于Beam Model (以前称为 [Dataflow Model](http://www.vldb.org/pvldb/vol8/p1792-Akidau.pdf)), 并在不同程度上实现了每个Beam runner. 为了帮助说明每个runners的功能，我们创建了以下功能矩阵.
 
-Individual capabilities have been grouped by their corresponding <span class="wwwh-what-dark">What</span> / <span class="wwwh-where-dark">Where</span> / <span class="wwwh-when-dark">When</span> / <span class="wwwh-how-dark">How</span> question:
+每个独立的功能都已按照相应的 <span class="wwwh-what-dark">What</span> / <span class="wwwh-where-dark">Where</span> / <span class="wwwh-when-dark">When</span> / <span class="wwwh-how-dark">How</span> 问题分组:
 
-- <span class="wwwh-what-dark">What</span> results are being calculated?
-- <span class="wwwh-where-dark">Where</span> in event time?
-- <span class="wwwh-when-dark">When</span> in processing time?
-- <span class="wwwh-how-dark">How</span> do refinements of results relate?
+- <span class="wwwh-what-dark">What</span> 对数据的处理是哪种类型?
+- <span class="wwwh-where-dark">Where</span> 数据在什么范围中计算?
+- <span class="wwwh-when-dark">When</span> 何时将计算结果输出?
+- <span class="wwwh-how-dark">How</span> 延迟数据如何处理?
 
-For more details on the <span class="wwwh-what-dark">What</span> / <span class="wwwh-where-dark">Where</span> / <span class="wwwh-when-dark">When</span> / <span class="wwwh-how-dark">How</span> breakdown of concepts, we recommend reading through the <a href="http://oreilly.com/ideas/the-world-beyond-batch-streaming-102">Streaming 102</a> post on O'Reilly Radar.
+关于 <span class="wwwh-what-dark">What</span> / <span class="wwwh-where-dark">Where</span> / <span class="wwwh-when-dark">When</span> / <span class="wwwh-how-dark">How</span> 概念的更多细节, 我们建议阅读 O'Reilly Radar上的<a href="http://oreilly.com/ideas/the-world-beyond-batch-streaming-102">Streaming 102</a> 帖子.
 
-Note that in the future, we intend to add additional tables beyond the current set, for things like runtime characterstics (e.g. at-least-once vs exactly-once), performance, etc.
+请注意，将来，我们打算在当前集合之外添加其他表，例如运行时特性（例如至少一次vs一次），性能等.
 
 {% include capability-matrix-common.md %}
 {% assign cap-data=site.data.capability-matrix %}
