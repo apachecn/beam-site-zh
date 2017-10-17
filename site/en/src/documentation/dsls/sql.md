@@ -4,41 +4,39 @@ title: "DSLs: SQL"
 permalink: /documentation/dsls/sql/
 ---
 
-* [1. 概述](#overview)
-* [2. DSL APIs的用法](#usage)
-* [3. Beam SQL的功能](#functionality)
-  * [3.1. 支持的功能](#features)
-  * [3.2. 数据类型](#data-type)
-  * [3.3. 内置的SQL函数](#built-in-functions)
-* [4. Beam SQL的内部](#internal-of-sql)
+* [1. Overview](#overview)
+* [2. Usage of DSL APIs](#usage)
+* [3. Functionality in Beam SQL](#functionality)
+  * [3.1. Supported Features](#features)
+  * [3.2. Data Types](#data-type)
+  * [3.3. built-in SQL functions](#built-in-functions)
+* [4. The Internal of Beam SQL](#internal-of-sql)
 
-该页面描述了Beam SQL的实现，以及如何使用DSL API简化Beam pipeline.
+This page describes the implementation of Beam SQL, and how to simplify a Beam pipeline with DSL APIs.
 
-> 注意，Beam SQL尚未合并到主分支（正在使用分支 [DSL_SQL](https://github.com/apache/beam/tree/DSL_SQL)), 但即将推出.
+> Note, Beam SQL hasn't been merged to master branch yet(being developed with branch [DSL_SQL](https://github.com/apache/beam/tree/DSL_SQL)), but is coming soon.
 
-# <a name="overview"></a>1. 概述
-SQL是一种采用简明语法处理数据的通用标准，
-使用DSL API（目前仅在Java中可用），现在可以使用标准SQL语句
-像查询常规表一样查询PCollections . DSL API利用 [Apache Calcite](http://calcite.apache.org/) 来解析和优化SQL查询，然后转换为复合Beam PTransform。通过这种方式，SQL和普通Beam PTransform可以在同一个pipeline中混合使用.
+# <a name="overview"></a>1. Overview
+SQL is a well-adopted standard to process data with concise syntax. With DSL APIs (currently available only in Java), now `PCollection`s can be queried with standard SQL statements, like a regular table. The DSL APIs leverage [Apache Calcite](http://calcite.apache.org/) to parse and optimize SQL queries, then translate into a composite Beam `PTransform`. In this way, both SQL and normal Beam `PTransform`s can be mixed in the same pipeline.
 
-SQL DSL API有两个主要部分:
+There are two main pieces to the SQL DSL API:
 
-* [BeamRecord]({{ site.baseurl }}/documentation/sdks/javadoc/{{ site.release_latest }}/index.html?org/apache/beam/sdk/values/BeamRecord.html): 用于定义由多个原始数据类型的多个名为列组成的复合记录（即行）的新数据类型。所有SQL DSL查询必须针对PCollection <BeamRecord>类型的集合进行。请注意，BeamRecord本身不是特定于SQL的，也可能在不使用SQL的pipelines 中使用.
-* [BeamSql]({{ site.baseurl }}/documentation/sdks/javadoc/{{ site.release_latest }}/index.html?org/apache/beam/sdk/extensions/sql/BeamSql.html): 用于从SQL查询创建PTransform的接口.
+* [BeamRecord]({{ site.baseurl }}/documentation/sdks/javadoc/{{ site.release_latest }}/index.html?org/apache/beam/sdk/values/BeamRecord.html): a new data type used to define composite records (i.e., rows) that consist of multiple, named columns of primitive data types. All SQL DSL queries must be made against collections of type `PCollection<BeamRecord>`. Note that `BeamRecord` itself is not SQL-specific, however, and may also be used in pipelines that do not utilize SQL.
+* [BeamSql]({{ site.baseurl }}/documentation/sdks/javadoc/{{ site.release_latest }}/index.html?org/apache/beam/sdk/extensions/sql/BeamSql.html): the interface for creating `PTransforms` from SQL queries.
 
-我们将在下面看一下这些.
+We'll look at each of these below.
 
-# <a name="usage"></a>2. DSL APIs的用法 
+# <a name="usage"></a>2. Usage of DSL APIs 
 
 ## BeamRecord
 
-将SQL查询应用于PCollection之前，集合中的数据必须为BeamRecord格式。 BeamRecord在Beam SQL PCollection中表示单个不可变行。记录中的字段/列的名称和类型由其关联的定义 [BeamRecordType]({{ site.baseurl }}/documentation/sdks/javadoc/{{ site.release_latest }}/index.html?org/apache/beam/sdk/values/BeamRecordType.html) ; 对于SQL查询，您应该使用 [BeamRecordSqlType]({{ site.baseurl }}/documentation/sdks/javadoc/{{ site.release_latest }}/index.html?org/apache/beam/sdk/extensions/sql/BeamRecordSqlType.html)  (查阅 [Data Types](#data-type) 获得有关支持的基本数据类型的更多详细信息).
+Before applying a SQL query to a `PCollection`, the data in the collection must be in `BeamRecord` format. A `BeamRecord` represents a single, immutable row in a Beam SQL `PCollection`. The names and types of the fields/columns in the record are defined by its associated [BeamRecordType]({{ site.baseurl }}/documentation/sdks/javadoc/{{ site.release_latest }}/index.html?org/apache/beam/sdk/values/BeamRecordType.html); for SQL queries, you should use the [BeamRecordSqlType]({{ site.baseurl }}/documentation/sdks/javadoc/{{ site.release_latest }}/index.html?org/apache/beam/sdk/extensions/sql/BeamRecordSqlType.html) subclass (see [Data Types](#data-type) for more details on supported primitive data types).
 
 
-`PCollection<BeamRecord>`可以显式或隐式地创建:
+A `PCollection<BeamRecord>` can be created explicitly or implicitly:
 
-显式地:
-  * **从内存中的数据** （通常用于单元测试）。在这种情况下，必须明确指定记录类型和编码器:
+Explicitly:
+  * **From in-memory data** (typically for unit testing). In this case, the record type and coder must be specified explicitly:
     ```
     // Define the record type (i.e., schema).
     List<String> fieldNames = Arrays.asList("appId", "description", "rowtime");
@@ -54,7 +52,7 @@ SQL DSL API有两个主要部分:
         .apply(Create.of(row)
                      .withCoder(nameType.getRecordCoder()));
     ```
-  * **对于 `PCollection<T>`** 其中 `T` 不是 `BeamRecord`, 通过应用PTransform将输入记录转换为BeamRecord格式:
+  * **From a `PCollection<T>`** where `T` is not already a `BeamRecord`, by applying a `PTransform` that converts input records to `BeamRecord` format:
     ```
     // An example POJO class.
     class AppPojo {
@@ -78,23 +76,21 @@ SQL DSL API有两个主要部分:
     ```
 
 
-隐式地:
-* **`BeamSql` `PTransform`** 应用于`PCollection<BeamRecord>`的结果 （下一节的细节）.
+Implicitly:
+* **As the result of a `BeamSql` `PTransform`** applied to a `PCollection<BeamRecord>` (details in the next section).
 
-一旦你有一个PCollection <BeamRecord>，你可以使用BeamSql API来应用.
+Once you have a `PCollection<BeamRecord>` in hand, you may use the `BeamSql` APIs to apply SQL queries to it.
 
 ## BeamSql
 
-`BeamSql` 提供了从SQL查询生成PTransform的两种方法，除了它们支持的输入数量之外，它们都是等效的:
+`BeamSql` provides two methods for generating a `PTransform` from a SQL query, both of which are equivalent except for the number of inputs they support:
 
-* `BeamSql.query()`, 可以应用于单个PCollection。
-在查询中 必须通过表名PCOLLECTION引用输入集合: 
+* `BeamSql.query()`, which may be applied to a single `PCollection`. The input collection must be referenced via the table name `PCOLLECTION` in the query: 
   ```
   PCollection<BeamRecord> filteredNames = testApps.apply(
       BeamSql.query("SELECT appId, description, rowtime FROM PCOLLECTION WHERE id=1"));
   ```
-* `BeamSql.queryMulti()`, 可以应用于包含一个或多个标记PCollection <BeamRecord>的PCollectionTuple。元组中每个PCollection的元组标记定义了可能用于查询它的表名。请注意，表名称绑定到特定的PCollectionTuple，因此仅在
-查询的上下文中应用它有效.
+* `BeamSql.queryMulti()`, which may be applied to a `PCollectionTuple` containing one or more tagged `PCollection<BeamRecord>`s. The tuple tag for each `PCollection` in the tuple defines the table name that may used to query it. Note that table names are bound to the specific `PCollectionTuple`, and thus are only valid in the context of queries applied to it.
   ```
   // Create a reviews PCollection to join to our apps PCollection.
   BeamRecordSqlType reviewType = BeamRecordSqlType.create(
@@ -111,12 +107,12 @@ SQL DSL API有两个主要部分:
                           FROM Apps INNER JOIN Reviews ON Apps.appId == Reviews.appId"));
   ```
 
-这两种方法都包含了解析/验证/汇编的后端细节，并提供了一个Beam SDK样式的API，可以将简单的TABLE_FILTER查询表达到包含JOIN / GROUP_BY等的复杂查询. 
+Both methods wrap the back-end details of parsing/validation/assembling, and deliver a Beam SDK style API that can express simple TABLE_FILTER queries up to complex queries containing JOIN/GROUP_BY etc. 
 
-[BeamSqlExample](https://github.com/apache/beam/blob/DSL_SQL/sdks/java/extensions/sql/src/main/java/org/apache/beam/sdk/extensions/sql/example/BeamSqlExample.java) 在代码库中展示了两种API的基本用法.
+[BeamSqlExample](https://github.com/apache/beam/blob/DSL_SQL/sdks/java/extensions/sql/src/main/java/org/apache/beam/sdk/extensions/sql/example/BeamSqlExample.java) in the code repository shows basic usage of both APIs.
 
-# <a name="functionality"></a>3.  Beam SQL的功能
-就像Beam中有界和无界数据的统一模型一样，SQL DSL也为有界和无界PCollection提供了相同的功能。以下是支持以 [BNF](http://en.wikipedia.org/wiki/Backus%E2%80%93Naur_Form)格式支持的SQL语法。对于不支持的功能，抛出UnsupportedOperationException异常.
+# <a name="functionality"></a>3. Functionality in Beam SQL
+Just as the unified model for both bounded and unbounded data in Beam, SQL DSL provides the same functionalities for bounded and unbounded `PCollection` as well. Here's the supported SQL grammar supported in [BNF](http://en.wikipedia.org/wiki/Backus%E2%80%93Naur_Form)-like form. An `UnsupportedOperationException` is thrown for unsupported features.
 
 ```
 query:
@@ -172,11 +168,11 @@ groupItem:
 
 ```
 
-## <a name="features"></a>3.1. 支持的功能
+## <a name="features"></a>3.1. Supported Features
 
-**1. 聚合;**
+**1. aggregations;**
 
-Beam SQL支持global_window，fixed_window，sliding_window和session_window中的group_by的聚合功能。需要一个类型为TIMESTAMP的字段来指定fixed_window / sliding_window / session_window。该字段用作行的事件时间戳。见下面几个例子:
+Beam SQL supports aggregation functions with group_by in global_window, fixed_window, sliding_window and session_window. A field with type `TIMESTAMP` is required to specify fixed_window/sliding_window/session_window. The field is used as event timestamp for rows. See below for several examples:
 
 ```
 //fixed window, one hour in duration
@@ -189,11 +185,11 @@ SELECT f_int, COUNT(*) AS `size` FROM PCOLLECTION GROUP BY f_int, HOP(f_timestam
 SELECT f_int, COUNT(*) AS `size` FROM PCOLLECTION GROUP BY f_int, SESSION(f_timestamp, INTERVAL '5' MINUTE)
 ```
 
-注意: 
+Note: 
 
-1. distinct 聚合还不支持.
-2. 默认触发器是 `Repeatedly.forever(AfterWatermark.pastEndOfWindow())`;
-3. 当 `time` 字段在 `HOP(dateTime, slide, size [, time ])`/`TUMBLE(dateTime, interval [, time ])`/`SESSION(dateTime, interval [, time ])` 被指定，一个后期触发器被添加为 
+1. distinct aggregation is not supported yet.
+2. the default trigger is `Repeatedly.forever(AfterWatermark.pastEndOfWindow())`;
+3. when `time` field in `HOP(dateTime, slide, size [, time ])`/`TUMBLE(dateTime, interval [, time ])`/`SESSION(dateTime, interval [, time ])` is specified, a lateFiring trigger is added as 
 
 ```
 Repeatedly.forever(AfterWatermark.pastEndOfWindow().withLateFirings(AfterProcessingTime
@@ -202,27 +198,26 @@ Repeatedly.forever(AfterWatermark.pastEndOfWindow().withLateFirings(AfterProcess
 
 **2. Join (inner, left_outer, right_outer);**
 
-连接的情景可以分为3种情况:
+The scenarios of join can be categorized into 3 cases:
 
 1. BoundedTable JOIN BoundedTable
 2. UnboundedTable JOIN UnboundedTable
 3. BoundedTable JOIN UnboundedTable
 
+For case 1 and case 2, a standard join is utilized as long as the windowFn of the both sides match. For case 3, sideInput is utilized to implement the join. So far there are some constraints:
 
-对于情况1和情况2，只要两边的窗口windowFn匹配，则使用标准连接。对于情况3，使用sideInput来实现连接。到目前为止还有一些限制:
+* Only equal-join is supported, CROSS JOIN is not supported;
+* FULL OUTER JOIN is not supported;
+* If it's a LEFT OUTER JOIN, the unbounded table should on the left side; If it's a RIGHT OUTER JOIN, the unbounded table should on the right side;
+* window/trigger is inherented from upstreams, which should be consistent;
 
-* 只支持相等连接，不支持CROSS JOIN;
-* 不支持FULL OUTER JOIN;
-* 如果这是一个左外连接, the unbounded table 应在左侧; 如果它是一个右外连接, the unbounded table 应该在右边;
-* 窗口/触发器来自上游，这应该是一致的;
+**3. User Defined Function (UDF) and User Defined Aggregate Function (UDAF);**
 
-**3. 用户自定义函数 (UDF)和用户自定义聚合函数 (UDAF);**
+If the required function is not available, developers can register their own UDF(for scalar function) and UDAF(for aggregation function).
 
-如果所需功能不可用，开发人员可以注册自己的UDF（用于标量功能）和UDAF（用于聚合功能）.
+**create and specify User Defined Function (UDF)**
 
-**创建并指定用户定义的功能 (UDF)**
-
-UDF可以是1）任何采用零个或多个标量字段并返回一个标量值的Java方法，或2）SerializableFunction。以下是UDF的一个例子，以及如何在DSL中使用它:
+A UDF can be 1) any Java method that takes zero or more scalar fields and return one scalar value, or 2) a `SerializableFunction`. Below is an example of UDF and how to use it in DSL:
 
 ```
 /**
@@ -252,9 +247,9 @@ PCollection<BeamSqlRow> result =
 		                        .withUdf("cubic2", new CubicIntegerFn()));
 ```
 
-**创建并指定用户定义的聚合函数 (UDAF)**
+**create and specify User Defined Aggregate Function (UDAF)**
 
-Beam SQL 可以接受一个CombineFn作为UDAF. 下面是UDAF的一个例子:
+Beam SQL can accept a `CombineFn` as UDAF. Here's an example of UDAF:
 
 ```
 /**
@@ -295,9 +290,8 @@ PCollection<BeamSqlRow> result =
         BeamSql.simpleQuery(sql).withUdaf("squaresum", new SquareSum()));
 ```
   
-## <a name="data-type"></a>3.2. 数据类型
-
-Beam SQL中的每个类型都映射到一个Java类以保存BeamRecord中的值。下表列出了当前存储库中支持的SQL类型和Java类之间的关系:
+## <a name="data-type"></a>3.2. Data Types
+Each type in Beam SQL maps to a Java class to holds the value in `BeamRecord`. The following table lists the relation between SQL types and Java classes, which are supported in current repository:
 
 | SQL Type | Java class |
 | ---- | ---- |
@@ -312,153 +306,153 @@ Beam SQL中的每个类型都映射到一个Java类以保存BeamRecord中的值�
 | Types.TIMESTAMP | java.util.Date |
 {:.table}
 
-## <a name="built-in-functions"></a>3.3. 内置的SQL函数
+## <a name="built-in-functions"></a>3.3. built-in SQL functions
 
-Beam SQL 已经实现了 [Apache Calcite](http://calcite.apache.org)中定义的大量内置函数. 可用的功能如下所示:
+Beam SQL has implemented lots of build-in functions defined in [Apache Calcite](http://calcite.apache.org). The available functions are listed as below:
 
-**比较函数和运算符**
+**Comparison functions and operators**
 
 | Operator syntax | Description |
 | ---- | ---- |
-| value1 = value2 | 等于 |
-| value1 <> value2 | 不等于 |
-| value1 > value2 | 大于 |
-| value1 >= value2 | 大于等于 |
-| value1 < value2 | 小于 |
-| value1 <= value2 | 小于或等于 |
+| value1 = value2 | Equals |
+| value1 <> value2 | Not equal |
+| value1 > value2 | Greater than |
+| value1 >= value2 | Greater than or equal |
+| value1 < value2 | Less than |
+| value1 <= value2 | Less than or equal |
 | value IS NULL | Whether value is null |
 | value IS NOT NULL | Whether value is not null |
 {:.table}
 
-**逻辑函数和运算符**
+**Logical functions and operators**
 
 | Operator syntax | Description |
 | ---- | ---- |
-| boolean1 OR boolean2 | boolean1是TRUE还是boolean2是TRUE |
-| boolean1 AND boolean2 | boolean1和boolean2是否都为TRUE |
-| NOT boolean | 布尔值不是TRUE;如果布尔值为UNKNOWN，则返回UNKNOWN |
+| boolean1 OR boolean2 | Whether boolean1 is TRUE or boolean2 is TRUE |
+| boolean1 AND boolean2 | Whether boolean1 and boolean2 are both TRUE |
+| NOT boolean | Whether boolean is not TRUE; returns UNKNOWN if boolean is UNKNOWN |
 {:.table}
 
-**算术函数和运算符**
+**Arithmetic functions and operators**
 
 | Operator syntax | Description|
 | ---- | ---- |
-| numeric1 + numeric2 | 返回numeric1加numeric2| 
-| numeric1 - numeric2 | 返回numeric1减numeric2| 
-| numeric1 * numeric2 | 返回numeric1乘以numeric2| 
-| numeric1 / numeric2 | 返回numeric1除以numeric2| 
-| MOD(numeric, numeric) | 返回numeric1的余数（模数）除以numeric2。仅当numeric1为负值时，结果为负值| 
+| numeric1 + numeric2 | Returns numeric1 plus numeric2| 
+| numeric1 - numeric2 | Returns numeric1 minus numeric2| 
+| numeric1 * numeric2 | Returns numeric1 multiplied by numeric2| 
+| numeric1 / numeric2 | Returns numeric1 divided by numeric2| 
+| MOD(numeric, numeric) | Returns the remainder (modulus) of numeric1 divided by numeric2. The result is negative only if numeric1 is negative| 
 {:.table}
 
-**数学函数**
+**Math functions**
 
 | Operator syntax | Description |
 | ---- | ---- |
-| ABS(numeric) | 返回数字的绝对值 |
-| SQRT(numeric) | 返回数字的平方根 |
-| LN(numeric) | 返回数字的自然对数（基数e） |
-| LOG10(numeric) | 返回数字的10位对数 |
-| EXP(numeric) | 返回e的数字次方 |
-| ACOS(numeric) | 返回数字的反余弦 |
-| ASIN(numeric) | 返回数字的正弦 |
-| ATAN(numeric) | 返回数字的反正切 |
+| ABS(numeric) | Returns the absolute value of numeric |
+| SQRT(numeric) | Returns the square root of numeric |
+| LN(numeric) | Returns the natural logarithm (base e) of numeric |
+| LOG10(numeric) | Returns the base 10 logarithm of numeric |
+| EXP(numeric) | Returns e raised to the power of numeric |
+| ACOS(numeric) | Returns the arc cosine of numeric |
+| ASIN(numeric) | Returns the arc sine of numeric |
+| ATAN(numeric) | Returns the arc tangent of numeric |
 | COT(numeric) | Returns the cotangent of numeric |
-| DEGREES(numeric) | 将数字从弧度转换为度数 |
-| RADIANS(numeric) | 将数字从度数转换为弧度 |
-| SIGN(numeric) | 返回数字的符号 |
-| SIN(numeric) | 返回数字的正弦 |
-| TAN(numeric) | 返回数值的正切值 |
-| ROUND(numeric1, numeric2) | 将numeric1到numeric2的数值舍入到小数点 |
+| DEGREES(numeric) | Converts numeric from radians to degrees |
+| RADIANS(numeric) | Converts numeric from degrees to radians |
+| SIGN(numeric) | Returns the signum of numeric |
+| SIN(numeric) | Returns the sine of numeric |
+| TAN(numeric) | Returns the tangent of numeric |
+| ROUND(numeric1, numeric2) | Rounds numeric1 to numeric2 places right to the decimal point |
 {:.table}
 
-**日期函数**
+**Date functions**
 
 | Operator syntax | Description |
 | ---- | ---- |
-| LOCALTIME | 以数据类型TIME返回会话时区中的当前日期和时间 |
-| LOCALTIME(precision) | 返回会话时区中数据类型TIME的当前日期和时间，精确到数字 |
-| LOCALTIMESTAMP | 以数据类型TIMESTAMP的值返回会话时区中的当前日期和时间 |
-| LOCALTIMESTAMP(precision) | 以数据类型TIMESTAMP的值返回会话时区中的当前日期和时间，精确到数字 |
-| CURRENT_TIME | 返回会话时区中的当前时间，数据类型为TIMESTAMP WITH TIME ZONE |
-| CURRENT_DATE | 返回会话时区中的当前日期，数据类型为DATE |
-| CURRENT_TIMESTAMP | 返回会话时区中的当前日期和时间，数据类型为TIMESTAMP WITH TIME ZONE |
-| EXTRACT(timeUnit FROM datetime) | 从datetime值表达式中提取并返回指定datetime字段的值 |
-| FLOOR(datetime TO timeUnit) | 将datetime向下舍入到timeUnit |
-| CEIL(datetime TO timeUnit) | 将datetime向上取到timeUnit |
-| YEAR(date) | 相当于EXTRACT（YEAR FROM date）。返回一个整数. |
-| QUARTER(date) | 相当于EXTRACT（QUARTER FROM date）。返回1到4之间的整数. |
-| MONTH(date) | 相当于EXTRACT（MONTH FROM date）。返回1到12之间的整数. |
-| WEEK(date) | 相当于EXTRACT（WEEK FROM date）。返回1到53之间的整数. |
-| DAYOFYEAR(date) | 相当于EXTRACT（从日期开始）。返回1到366之间的整数. |
-| DAYOFMONTH(date) | 相当于EXTRACT（D FROM FROM date）。返回1到31之间的整数. |
-| DAYOFWEEK(date) | 相当于EXTRACT（DOW FROM date）。返回1到7之间的整数. |
-| HOUR(date) | 相当于EXTRACT（HOUR FROM date）。返回0到23之间的整数. |
-| MINUTE(date) | 相当于EXTRACT（MINUTE FROM date）。返回0到59之间的整数. |
-| SECOND(date) | 相当于EXTRACT（从日期开始）。返回0到59之间的整数. |
+| LOCALTIME | Returns the current date and time in the session time zone in a value of datatype TIME |
+| LOCALTIME(precision) | Returns the current date and time in the session time zone in a value of datatype TIME, with precision digits of precision |
+| LOCALTIMESTAMP | Returns the current date and time in the session time zone in a value of datatype TIMESTAMP |
+| LOCALTIMESTAMP(precision) | Returns the current date and time in the session time zone in a value of datatype TIMESTAMP, with precision digits of precision |
+| CURRENT_TIME | Returns the current time in the session time zone, in a value of datatype TIMESTAMP WITH TIME ZONE |
+| CURRENT_DATE | Returns the current date in the session time zone, in a value of datatype DATE |
+| CURRENT_TIMESTAMP | Returns the current date and time in the session time zone, in a value of datatype TIMESTAMP WITH TIME ZONE |
+| EXTRACT(timeUnit FROM datetime) | Extracts and returns the value of a specified datetime field from a datetime value expression |
+| FLOOR(datetime TO timeUnit) | Rounds datetime down to timeUnit |
+| CEIL(datetime TO timeUnit) | Rounds datetime up to timeUnit |
+| YEAR(date) | Equivalent to EXTRACT(YEAR FROM date). Returns an integer. |
+| QUARTER(date) | Equivalent to EXTRACT(QUARTER FROM date). Returns an integer between 1 and 4. |
+| MONTH(date) | Equivalent to EXTRACT(MONTH FROM date). Returns an integer between 1 and 12. |
+| WEEK(date) | Equivalent to EXTRACT(WEEK FROM date). Returns an integer between 1 and 53. |
+| DAYOFYEAR(date) | Equivalent to EXTRACT(DOY FROM date). Returns an integer between 1 and 366. |
+| DAYOFMONTH(date) | Equivalent to EXTRACT(DAY FROM date). Returns an integer between 1 and 31. |
+| DAYOFWEEK(date) | Equivalent to EXTRACT(DOW FROM date). Returns an integer between 1 and 7. |
+| HOUR(date) | Equivalent to EXTRACT(HOUR FROM date). Returns an integer between 0 and 23. |
+| MINUTE(date) | Equivalent to EXTRACT(MINUTE FROM date). Returns an integer between 0 and 59. |
+| SECOND(date) | Equivalent to EXTRACT(SECOND FROM date). Returns an integer between 0 and 59. |
 {:.table}
 
-**字符串函数**
+**String functions**
 
 | Operator syntax | Description |
 | ---- | ---- |
-| string \|\| string | 连接两个字符串 |
-| CHAR_LENGTH(string) | 返回字符串中的字符数 |
-| CHARACTER_LENGTH(string) | 同 CHAR_LENGTH(string) |
-| UPPER(string) | 返回转换为大写字符的字符串 |
-| LOWER(string) | 返回转换为小写字符的字符串 |
-| POSITION(string1 IN string2) | 返回string1在string2中第一次出现的位置 |
-| POSITION(string1 IN string2 FROM integer) | 返回在给定点（不是标准SQL）开始的string1在string2中第一次出现的位置 |
-| TRIM( { BOTH \| LEADING \| TRAILING } string1 FROM string2) | 从string1的开始/结束/两端删除只包含string1中的字符的最长字符串 |
-| OVERLAY(string1 PLACING string2 FROM integer [ FOR integer2 ]) | 用string2替换string1的子串 |
-| SUBSTRING(string FROM integer) | 返回从给定点开始的字符串的子字符串 |
-| SUBSTRING(string FROM integer FOR integer) | 返回从给定长度开始的字符串的子字符串 |
-| INITCAP(string) | 返回字符串，每个字转换器的第一个字母大写，其余为小写。字是由非字母数字字符分隔的字母数字字符的序列. |
+| string \|\| string | Concatenates two character strings |
+| CHAR_LENGTH(string) | Returns the number of characters in a character string |
+| CHARACTER_LENGTH(string) | As CHAR_LENGTH(string) |
+| UPPER(string) | Returns a character string converted to upper case |
+| LOWER(string) | Returns a character string converted to lower case |
+| POSITION(string1 IN string2) | Returns the position of the first occurrence of string1 in string2 |
+| POSITION(string1 IN string2 FROM integer) | Returns the position of the first occurrence of string1 in string2 starting at a given point (not standard SQL) |
+| TRIM( { BOTH \| LEADING \| TRAILING } string1 FROM string2) | Removes the longest string containing only the characters in string1 from the start/end/both ends of string1 |
+| OVERLAY(string1 PLACING string2 FROM integer [ FOR integer2 ]) | Replaces a substring of string1 with string2 |
+| SUBSTRING(string FROM integer) | Returns a substring of a character string starting at a given point |
+| SUBSTRING(string FROM integer FOR integer) | Returns a substring of a character string starting at a given point with a given length |
+| INITCAP(string) | Returns string with the first letter of each word converter to upper case and the rest to lower case. Words are sequences of alphanumeric characters separated by non-alphanumeric characters. |
 {:.table}
 
-**条件函数**
+**Conditional functions**
 
 | Operator syntax | Description |
 | ---- | ---- |
 | CASE value <br>WHEN value1 [, value11 ]* THEN result1 <br>[ WHEN valueN [, valueN1 ]* THEN resultN ]* <br>[ ELSE resultZ ] <br>END | Simple case |
 | CASE <br>WHEN condition1 THEN result1 <br>[ WHEN conditionN THEN resultN ]* <br>[ ELSE resultZ ] <br>END | Searched case |
-| NULLIF(value, value) | 如果值相同，则返回NULL。例如，NULLIF（5，5）返回NULL; NULLIF（5，0）返回5. |
-| COALESCE(value, value [, value ]*) | 如果第一个值为空，则提供一个值。例如，COALESCE（NULL，5）返回5. |
+| NULLIF(value, value) | Returns NULL if the values are the same. For example, NULLIF(5, 5) returns NULL; NULLIF(5, 0) returns 5. |
+| COALESCE(value, value [, value ]*) | Provides a value if the first value is null. For example, COALESCE(NULL, 5) returns 5. |
 {:.table}
 
-**类型转换函数**
+**Type conversion functions**
 
-**聚合函数**
+**Aggregate functions**
 
 | Operator syntax | Description |
 | ---- | ---- |
-| COUNT(*) | 返回输入行数 |
-| AVG(numeric) | 返回所有输入值之间的数字的平均值（算术平均值） |
-| SUM(numeric) | 返回所有输入值之间的数字之和 |
-| MAX(value) | 返回所有输入值的值的最大值 |
-| MIN(value) | 返回所有输入值的最小值 |
+| COUNT(*) | Returns the number of input rows |
+| AVG(numeric) | Returns the average (arithmetic mean) of numeric across all input values |
+| SUM(numeric) | Returns the sum of numeric across all input values |
+| MAX(value) | Returns the maximum value of value across all input values |
+| MIN(value) | Returns the minimum value of value across all input values |
 {:.table}
 
-# <a name="internal-of-sql"></a>4. Beam SQL的内部
-图1描述了从SQL语句到Beam PTransform的后端步骤.
+# <a name="internal-of-sql"></a>4. The Internal of Beam SQL
+Figure 1 describes the back-end steps from a SQL statement to a Beam `PTransform`.
 
 ![Workflow of Beam SQL DSL]({{ "/images/beam_sql_dsl_workflow.png" | prepend: site.baseurl }} "workflow of Beam SQL DSL")
 
-**图1** Beam SQL DSL工作流程
+**Figure 1** workflow of Beam SQL DSL
 
-给定一个PCollection和查询作为输入，首先将输入PCollection注册为模式存储库中的一个表。然后它被处理为:
+Given a `PCollection` and the query as input, first of all the input `PCollection` is registered as a table in the schema repository. Then it's processed as:
 
-1. 根据语法对SQL查询进行解析，生成SQL抽象语法树;
-2. 验证表结构，并输出用关系代数表示的逻辑计划;
-3. 应用关系规则将逻辑计划转换为物理计划，表示为 Beam组件. 优化器是可选的，以更新计划;
-4. 最终, Beam 物理计划被编译为复合 `PTransform`;
+1. SQL query is parsed according to grammar to generate a SQL Abstract Syntax Tree;
+2. Validate against table schema, and output a logical plan represented with relational algebras;
+3. Relational rules are applied to convert it to a physical plan, expressed with Beam components. An optimizer is optional to update the plan;
+4. Finally, the Beam physical plan is compiled as a composite `PTransform`;
 
-下面是一个例子展示了一个从输入`PCollection`过滤和项目的查询 :
+Here is an example to show a query that filters and projects from an input `PCollection`:
 
 ```
 SELECT USER_ID, USER_NAME FROM PCOLLECTION WHERE USER_ID = 1
 ```
 
-逻辑计划显示为:
+The logical plan is shown as:
 
 ```
 LogicalProject(USER_ID=[$0], USER_NAME=[$1])
@@ -466,7 +460,7 @@ LogicalProject(USER_ID=[$0], USER_NAME=[$1])
     LogicalTableScan(table=[[PCOLLECTION]])
 ```
 
-并编译为复合 `PTransform`
+And compiled as a composite `PTransform`
 
 ```
 pCollection.apply(BeamSqlFilter...)
