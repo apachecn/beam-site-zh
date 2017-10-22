@@ -7,13 +7,13 @@ redirect_from:
   - /use/mailing-lists/
 ---
 
-# Support
+# 技术支持
 
-You can find different means of support in the sections below.
+本章节，您可以找到不同的技术支持方案。
 
-## Mailing Lists
+## 邮件类表
 
-The following are the mailing lists that have been established for the Apache Beam project.
+以下是Apache Beam 项目建立的邮件列表：
 
 <table class="table table-hover">
   <thead>
@@ -54,22 +54,23 @@ The following are the mailing lists that have been established for the Apache Be
 </tbody>
 </table>
 
-## Issue Tracking
+## 问题跟踪
 
-Apache Beam project uses [JIRA](http://www.atlassian.com/software/jira) for issue tracking.
 
-Issues, bugs, and feature requests should be submitted to the following issue tracking system for this project.
+Apache Beam 项目使用 [JIRA](http://www.atlassian.com/software/jira) 对问题进行跟踪.
+
+项目中的任何问题, bugs及新特性功能需求等可以提交到如下跟踪系统。
+
 
 <code>
 <a href="https://issues.apache.org/jira/browse/BEAM">https://issues.apache.org/jira/browse/BEAM</a>
 </code>
 
-## Beam on Stack Overflow
+## Beam 堆栈溢出
+你可以通过单击本连接[Beam on Stack Overflow](http://stackoverflow.com/questions/tagged/apache-beam)找到该问题的相关解答。
 
-You can find answers to many questions about [Beam on Stack Overflow](http://stackoverflow.com/questions/tagged/apache-beam).
+## Beam 协作通道(Slack Channel)
 
-## Beam Slack Channel
-
-You can participate in discussions and ask questions on the [Beam Slack Channel](https://apachebeam.slack.com/).
+你可以在[Beam Slack Channel](https://apachebeam.slack.com/)上面参与讨论和提出问题。
 
 
