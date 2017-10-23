@@ -10,9 +10,15 @@ redirect_from:
 
 # Apache Beam&#8482; 下载
 
+<<<<<<< HEAD
+下载 Apache Beam 最简单的方式就是通过Apache Beam 中心仓库获取一份稳定地发行版本。并可以利用[Maven Central Repository](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.apache.beam%22) 或[PyPI](https://pypi.python.org/pypi/apache-beam)获取Java SDK 或 Python SDK 开发工具。 
+
+例如，如果你正在利用 Maven 开发并想在 Java SDK 运行`DirectRunner`,则可以将依赖按照如下添加到配置文件`pom.xml`中：
+=======
 使用Apache Beam 最简单的方法就是通过中央仓库获取一个发布版本。可以使用Java SDK 或 Python SDK 从 [Maven Central Repository](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.apache.beam%22) 和 [PyPI](https://pypi.python.org/pypi/apache-beam) 获取.
 
 例如，如果正在使用Maven项目管理工具，并想使用Java SDK 执行 `DirectRunner`，则添加如下依赖关系到 `pom.xml` 文件：
+>>>>>>> f060ab65a185cc6a6ebf2051f61d00982aa7798f
 
     <dependency>
       <groupId>org.apache.beam</groupId>
@@ -26,7 +32,11 @@ redirect_from:
       <scope>runtime</scope>
     </dependency>
 
+<<<<<<< HEAD
+类似地，如果利用PyPI, 使用python 执行`DirectRunner`，则需要添加如下需求到`setup.py`文件中：
+=======
 类似地，如果使用PypI并想使用Python SDK执行 `DirectRunner`, 请添加一下字段到 `setup.py` 文件:
+>>>>>>> f060ab65a185cc6a6ebf2051f61d00982aa7798f
 
     apache-beam=={{ site.release_latest }}
 
