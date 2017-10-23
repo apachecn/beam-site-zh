@@ -4,54 +4,56 @@ title: "Cloud Dataflow Runner"
 permalink: /documentation/runners/dataflow/
 redirect_from: /learn/runners/dataflow/
 ---
-# Using the Google Cloud Dataflow Runner
 
+# 使用谷歌云数据流执行器
 <nav class="language-switcher">
-  <strong>Adapt for:</strong>
+  <strong>适用于:</strong>
   <ul>
     <li data-type="language-java" class="active">Java SDK</li>
     <li data-type="language-py">Python SDK</li>
   </ul>
 </nav>
 
-The Google Cloud Dataflow Runner uses the [Cloud Dataflow managed service](https://cloud.google.com/dataflow/service/dataflow-service-desc). When you run your pipeline with the Cloud Dataflow service, the runner uploads your executable code and dependencies to a Google Cloud Storage bucket and creates a Cloud Dataflow job, which executes your pipeline on managed resources in Google Cloud Platform.
+谷歌云数据流执行器使用[Cloud Dataflow managed service](https://cloud.google.com/dataflow/service/dataflow-service-desc).当你使用谷歌数据流服务执行管道程序时，执行器会上传你的可执行代码和相应依赖到谷歌云存储器并且创建一个云数据流作业，它会使用在谷歌云平台上管理的资源去执行你的管道任务。
 
-The Cloud Dataflow Runner and service are suitable for large scale, continuous jobs, and provide:
 
-* a fully managed service
-* [autoscaling](https://cloud.google.com/dataflow/service/dataflow-service-desc#autoscaling) of the number of workers throughout the lifetime of the job
-* [dynamic work rebalancing](https://cloud.google.com/blog/big-data/2016/05/no-shard-left-behind-dynamic-work-rebalancing-in-google-cloud-dataflow)
+该云数据流执行器和服务适用于大量的、持续性的任务并且提供：
 
-The [Beam Capability Matrix]({{ site.baseurl }}/documentation/runners/capability-matrix/) documents the supported capabilities of the Cloud Dataflow Runner.
+* 一个完全的托管服务
+* [自动伸缩](https://cloud.google.com/dataflow/service/dataflow-service-desc#autoscaling) 在作业执行期间使用的工作节点。
+* [动态负载均衡](https://cloud.google.com/blog/big-data/2016/05/
+在谷歌云数据流中动态负载均衡使得每个分片都参与工作）
 
-## Cloud Dataflow Runner prerequisites and setup
-To use the Cloud Dataflow Runner, you must complete the following setup:
 
-1. Select or create a Google Cloud Platform Console project.
+[Beam 功能矩阵]({{ site.baseurl }}/documentation/runners/capability-matrix/) 记录了云数据流执行器支持的功能。
 
-2. Enable billing for your project.
+## 云数据流执行器前提条件和安装：
+为了使用云数据流执行器，你必须完成以下步骤：
 
-3. Enable the required Google Cloud APIs: Cloud Dataflow, Compute Engine,
-   Stackdriver Logging, Cloud Storage, Cloud Storage JSON, and Cloud Resource
-   Manager. You may need to enable additional APIs (such as BigQuery, Cloud
-   Pub/Sub, or Cloud Datastore) if you use them in your pipeline code.
+1. 选择或者创建一个谷歌云平台终端项目。
 
-4. Install the Google Cloud SDK.
+2. 开通项目付费
 
-5. Create a Cloud Storage bucket.
-    * In the Google Cloud Platform Console, go to the Cloud Storage browser.
-    * Click **Create bucket**.
-    * In the **Create bucket** dialog, specify the following attributes:
-      * _Name_: A unique bucket name. Do not include sensitive information in the bucket name, as the bucket namespace is global and publicly visible.
-      * _Storage class_: Multi-Regional
-      * _Location_:  Choose your desired location
-    * Click **Create**.
+3. 使用必须的谷歌云APIs：云数据流，计算引擎，堆栈驱动日志记录，云存储，云json存储，云资源管理器。
+你可能需要使用额外的APIs（比如大查询，云发布/订阅，或者云数据库）如果你要在管道流程序里面使用它。
 
-For more information, see the *Before you begin* section of the [Cloud Dataflow quickstarts](https://cloud.google.com/dataflow/docs/quickstarts).
+4. 安装谷歌云SDK。
 
-### Specify your dependency
+5. 创造一个云存储桶。
+    * 在谷歌云平台终端，跳转到云存储浏览器。
+    * 点击 **创建桶**
+    * 在**创建桶**对话框中，选择以下属性：
+      * _名字_：独一无二的桶名。不要在桶名中包含敏感信息，因为桶命名空间是全局的和公开可见的。
+      * _存储类_: 多地域
+      * _地址_: 选择你钟爱的地址。
+    * 点击 **创建**。
 
-<span class="language-java">When using Java, you must specify your dependency on the Cloud Dataflow Runner in your `pom.xml`.</span>
+相关更多信息，请查看章节 *在你开始前* ，该部分位于[云数据流快速开始](https://cloud.google.com/dataflow/docs/quickstarts)。
+
+### 指定你的依赖
+
+
+<span class="language-java">当使用java, 你必须在你的pom.xml中指定云数据流执行器的依赖。</span>
 ```java
 <dependency>
   <groupId>org.apache.beam</groupId>
@@ -61,44 +63,45 @@ For more information, see the *Before you begin* section of the [Cloud Dataflow 
 </dependency>
 ```
 
-<span class="language-py">This section is not applicable to the Beam SDK for Python.</span>
+<span class="language-py">该部分不适用于python的 Beam SDK。</span>
 
-### Authentication
+### 授权
+在执行你的管道流程序前，你一定要授权谷歌云平台。执行以下命令来获得[应用默认证书](https://developers.google.com/identity/protocols/application-default-credentials).
 
-Before running your pipeline, you must authenticate with the Google Cloud Platform. Run the following command to get [Application Default Credentials](https://developers.google.com/identity/protocols/application-default-credentials).
 
 ```
-gcloud auth application-default login
+谷歌云授权应用默认登陆 
 ```
 
-## Pipeline options for the Cloud Dataflow Runner
+## 谷歌数据流执行器的管道流选项
 
-<span class="language-java">When executing your pipeline with the Cloud Dataflow Runner (Java), consider these common pipeline options.</span>
-<span class="language-py">When executing your pipeline with the Cloud Dataflow Runner (Python), consider these common pipeline options.</span>
+<span class="language-java">当使用谷歌数据流执行器（java）执行你的管道流程序时，应该考虑这些通用的管道流选项。</span>
+<span class="language-py">当使用谷歌数据流执行器（Python）执行你的管道流程序时，应该考虑这些通用的管道流选项。</span>
 
 <table class="table table-bordered">
 <tr>
-  <th>Field</th>
-  <th>Description</th>
-  <th>Default Value</th>
+  <th>字段</th>
+  <th>描述</th>
+  <th>默认值</th>
 </tr>
 
 <tr>
   <td><code>runner</code></td>
-  <td>The pipeline runner to use. This option allows you to determine the pipeline runner at runtime.</td>
-  <td>Set to <code>dataflow</code> or <code>DataflowRunner</code> to run on the Cloud Dataflow Service.</td>
+  <td>使用这个管道流执行器。该选项使你可以决定在执行的时候的管道流执行器。</td>
+  <td>设置 <code>数据流</code> 或者 <code>数据流执行器</code> 运行在谷歌数据流服务上</td>
 </tr>
 
 <tr>
   <td><code>project</code></td>
-  <td>The project ID for your Google Cloud Project.</td>
-  <td>If not set, defaults to the default project in the current environment. The default project is set via <code>gcloud</code>.</td>
+  <td>你的谷歌云项目项目 ID 。</td>
+  <td>如果没有设置，默认为当前环境下的默认项目。默认项目的设置使用<code>谷歌云</code>。</td>
 </tr>
 
 <!-- Only show for Java -->
 <tr class="language-java">
   <td><code>streaming</code></td>
-  <td>Whether streaming mode is enabled or disabled; <code>true</code> if enabled. Set to <code>true</code> if running pipelines with unbounded <code>PCollection</code>s.</td>
+  <td>是否流模式设置为打开或者关闭；<code>true</code> 如果打开，请设置为<code>true</code> 如果执行管道流程序使用无界
+   <code>集合</code>s。</td>
   <td><code>false</code></td>
 </tr>
 
@@ -108,19 +111,19 @@ gcloud auth application-default login
     <span class="language-py"><code>temp_location</code></span>
   </td>
   <td>
-    <span class="language-java">Optional.</span>
-    <span class="language-py">Required.</span>
-    Path for temporary files. Must be a valid Google Cloud Storage URL that begins with <code>gs://</code>.
-    <span class="language-java">If set, <code>tempLocation</code> is used as the default value for <code>gcpTempLocation</code>.</span>
+    <span class="language-java">可选项。</span>
+    <span class="language-py"> 必选项。</span>
+    临时文件的存放路径。必须是一个有效的谷歌云存储URL，以 <code>gs://</code>开头。
+    <span class="language-java">如果设置了, <code>临时目录</co奖杯用作<code>gcp临时目录</code>的默认值。</span>
   </td>
-  <td>No default value.</td>
+  <td>没有默认值。</td>
 </tr>
 
 <!-- Only show for Java -->
 <tr class="language-java">
   <td><code>gcpTempLocation</code></td>
-  <td>Cloud Storage bucket path for temporary files. Must be a valid Cloud Storage URL that begins with <code>gs://</code>.</td>
-  <td>If not set, defaults to the value of <code>tempLocation</code>, provided that <code>tempLocation</code> is a valid Cloud Storage URL. If <code>tempLocation</code> is not a valid Cloud Storage URL, you must set <code>gcpTempLocation</code>.</td>
+  <td>云存储桶的临时目录必须是一个有效的云存储URL，以<code>gs://</code>开头.</td>
+  <td>如果没有设置，默认的<code>临时目录</code>会被提供。 <code>临时目录</code> 是一个有效的云存储URL.如果<code>临时目录</code> 不是一个有效的云存储URL, 你必须设置一个 <code>gcp临时目录</code>.</td>
 </tr>
 
 <tr>
@@ -128,47 +131,47 @@ gcloud auth application-default login
     <span class="language-java"><code>stagingLocation</code></span>
     <span class="language-py"><code>staging_location</code></span>
   </td>
-  <td>Optional. Cloud Storage bucket path for staging your binary and any temporary files. Must be a valid Cloud Storage URL that begins with <code>gs://</code>.</td>
+  <td>可选项. 存储你的二进制和任何临时文件的云存储桶路径。 这个路径必须是一个有效的云存储URL，以<code>gs://</code>开头.</td>
   <td>
-    <span class="language-java">If not set, defaults to a staging directory within <code>gcpTempLocation</code>.</span>
-    <span class="language-py">If not set, defaults to a staging directory within <code>temp_location</code>.</span>
+    <span class="language-java">如果没有设置, 默认设置遵照 <code>gcp临时目录</code>.</span>
+    <span class="language-py">如果没有设置, 默认设置遵照<code>临时目录</code>.</span>
   </td>
 </tr>
 
 <!-- Only show for Python -->
 <tr class="language-py">
   <td><code>save_main_session</code></td>
-  <td>Save the main session state so that pickled functions and classes defined in <code>__main__</code> (e.g. interactive session) can be unpickled. Some workflows do not need the session state if, for instance, all of their functions/classes are defined in proper modules (not <code>__main__</code>) and the modules are importable in the worker.</td>
+  <td>保存主要的 session 状态 ，因此被定义在<code>__main__</code> (e.g. 交互式的 session) 中的序列化函数和类可以被反序列化。一些工作流不需要session状态，例如，如果所有的函数或类都定义在合适的模块中  (除了 <code>__main__</code>) 并且这些模块在节点中被加载。</td>
   <td><code>false</code></td>
 </tr>
 
 <!-- Only show for Python -->
 <tr class="language-py">
   <td><code>sdk_location</code></td>
-  <td>Override the default location from where the Beam SDK is downloaded. This value can be an URL, a Cloud Storage path, or a local path to an SDK tarball. Workflow submissions will download or copy the SDK tarball from this location. If set to the string <code>default</code>, a standard SDK location is used. If empty, no SDK is copied.</td>
+  <td>使用Beam SDK的下载路径覆盖默认路径。这个值可以是一个URL，一个云存储路径或者一个SDK开发包的本地路径。 被提交的工作流将会从此路径下载或者拷贝开发包。 如果设置成  <code>default</code>, 将会使用标准的SDK路径. 如果为空, 没有SDK会被拷贝.</td>
   <td><code>default</code></td>
 </tr>
 
 
 </table>
 
-See the reference documentation for the
+查看相关的文档
 <span class="language-java">[DataflowPipelineOptions]({{ site.baseurl }}/documentation/sdks/javadoc/{{ site.release_latest }}/index.html?org/apache/beam/runners/dataflow/options/DataflowPipelineOptions.html)</span>
 <span class="language-py">[`PipelineOptions`]({{ site.baseurl }}/documentation/sdks/pydoc/{{ site.release_latest }}/apache_beam.options.html#apache_beam.options.pipeline_options.PipelineOptions)</span>
-interface (and any subinterfaces) for additional pipeline configuration options.
+接口 (和任何子接口)，额外的管道配置选项.
 
-## Additional information and caveats
+## 附加的说明和警告
 
-### Monitoring your job
+### 监控你的任务
 
-While your pipeline executes, you can monitor the job's progress, view details on execution, and receive updates on the pipeline's results by using the [Dataflow Monitoring Interface](https://cloud.google.com/dataflow/pipelines/dataflow-monitoring-intf) or the [Dataflow Command-line Interface](https://cloud.google.com/dataflow/pipelines/dataflow-command-line-intf).
+当你的管道流程序执行时，你可以监控程序的进度，查看执行的细节，并且接收管道流程序结果的更新，通过 [数据流监视接口](https://cloud.google.com/dataflow/pipelines/dataflow-monitoring-intf) 或者 [数据流命令行接口](https://cloud.google.com/dataflow/pipelines/dataflow-command-line-intf).
 
-### Blocking Execution
+### 阻塞执行
 
-To block until your job completes, call <span class="language-java"><code>waitToFinish</code></span><span class="language-py"><code>wait_until_finish</code></span> on the `PipelineResult` returned from `pipeline.run()`. The Cloud Dataflow Runner prints job status updates and console messages while it waits. While the result is connected to the active job, note that pressing **Ctrl+C** from the command line does not cancel your job. To cancel the job, you can use the [Dataflow Monitoring Interface](https://cloud.google.com/dataflow/pipelines/dataflow-monitoring-intf) or the [Dataflow Command-line Interface](https://cloud.google.com/dataflow/pipelines/dataflow-command-line-intf).
+阻塞直至你的程序执行完成, 使用 <span class="language-java"><code>waitToFinish </code></span><span class="language-py"><code>wait_until_finish</code></span>在`PipelineResult` 从 `pipeline.run()`的返回处. 云数据流执行器打印任务状态的更新和终端消息当此处阻塞的时候。当结果终端连接到活动的任务时，注意在命令行中按下**Ctrl+C** 不会取消你的任务。为了取消任务，你可以使用[数据流监视接口](https://cloud.google.com/dataflow/pipelines/dataflow-monitoring-intf) 或者 [数据流命令行接口](https://cloud.google.com/dataflow/pipelines/dataflow-command-line-intf).
 
-### Streaming Execution
+### 流式执行
 
-<span class="language-java">If your pipeline uses an unbounded data source or sink, you must set the `streaming` option to `true`.</span>
-<span class="language-py">The Beam SDK for Python does not currently support streaming pipelines.</span>
+<span class="language-java">如果你的管道程序使用一个源源不断的数据源，你必须设置 `streaming` 选项为 `true`.</span>
+<span class="language-py">适用于Python 的Beam SDK 现在还不支持流式的管道程。</span>
 
