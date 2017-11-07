@@ -3,26 +3,26 @@ layout: default
 title: "Create Your Pipeline"
 permalink: /documentation/pipelines/create-your-pipeline/
 ---
-# Create Your Pipeline
+# 创建你的 Pipeline
 
 * TOC
 {:toc}
 
-Your Beam program expresses a data processing pipeline, from start to finish. This section explains the mechanics of using the classes in the Beam SDKs to build a pipeline. To construct a pipeline using the classes in the Beam SDKs, your program will need to perform the following general steps:
+你的 Beam程序表达的是一种数据处理的 pipeline，从开始到完成。这一节介绍使用 Beam SDKs 中的类构造一个 pipeline机制。为了使用 Beam SDKs中的类构造 pipeline ，你的程序需要执行下面通用的步骤:
 
-*   Create a `Pipeline` object.
-*   Use a **Read** or **Create** transform to create one or more `PCollection`s for your pipeline data.
-*   Apply **transforms** to each `PCollection`. Transforms can change, filter, group, analyze, or otherwise process the elements in a `PCollection`. Each transform creates a new output `PCollection`, to which you can apply additional transforms until processing is complete.
-*   **Write** or otherwise output the final, transformed `PCollection`s.
-*   **Run** the pipeline.
 
-## Creating Your Pipeline Object
+*   创建一个 `Pipeline` 对象.
+*   使用 一个 **Read** 或者 **Create** transform 对pipeline 数据创建一个或者多个`PCollection`。 
+*   对每个PCollection` 应用 **transforms** . Transforms 可以改变，过滤，分组，分组，或者其他操作来处理 `PCollection`中的元素。每个 transform（转换）创建一个新的输出 `PCollection`，你还可以当处理完成后做额外的 transform（转换）。
+*   **Write** 或以其他方式输出最终转换的 `PCollection`s。
+*   **运行** the pipeline.
 
-A Beam program often starts by creating a `Pipeline` object.
+## 创建你的 `Pipeline` 对象
 
-In the Beam SDKs, each pipeline is represented by an explicit object of type `Pipeline`. Each `Pipeline` object is an independent entity that encapsulates both the data the pipeline operates over and the transforms that get applied to that data.
+一个 Beam 程序经常从创建一个 `Pipeline` 对象开始。每个 `Pipeline`对象都是一个独立的实体，封装了 pipeline 运行的数据和应用于该数据的 transform（转换）。
 
-To create a pipeline, declare a `Pipeline` object, and pass it some [configuration options]({{ site.baseurl }}/documentation/programming-guide#configuring-pipeline-options).
+
+创建一个 pipeline, 声明一个 `Pipeline` 对象, 并传递一些 [配置选项]({{ site.baseurl }}/documentation/programming-guide#configuring-pipeline-options).
 
 ```java
 // Start by defining the options for the pipeline.
@@ -32,26 +32,28 @@ PipelineOptions options = PipelineOptionsFactory.create();
 Pipeline p = Pipeline.create(options);
 ```
 
-## Reading Data Into Your Pipeline
+## 从你的 Pipeline 读取数据
 
-To create your pipeline's initial `PCollection`, you apply a root transform to your pipeline object. A root transform creates a `PCollection` from either an external data source or some local data you specify.
+为了创建 pipeline 的初始`PCollection`，你对你的 pipeline 对象应用一个 root transform。 root transform 从外部数据源或指定的某些本地数据创建 `PCollection`。  
 
-There are two kinds of root transforms in the Beam SDKs: `Read` and `Create`. `Read` transforms read data from an external source, such as a text file or a database table. `Create` transforms create a `PCollection` from an in-memory `java.util.Collection`.
+在 Beam SDKs 中有两类transforms: `Read` 和 `Create`。`Read` 转换从外部源读取数据，例如文件文件或者数据库表。`Create` transforms 使用存储在内存里的 `java.util.Collection` 创建一个 `PCollection`。
 
-The following example code shows how to `apply` a `TextIO.Read` root transform to read data from a text file. The transform is applied to a `Pipeline` object `p`, and returns a pipeline data set in the form of a `PCollection<String>`:
+下面例子的代码展示了应用一个 `TextIO.Read` root transform，从文本文件中读取数据。transform 应用到 `Pipeline`对象`p`，并将 pipeline 数据集以 `PCollection<String>`格式返回:
+
 
 ```java
 PCollection<String> lines = p.apply(
   "ReadLines", TextIO.read().from("gs://some/inputData.txt"));
 ```
 
-## Applying Transforms to Process Pipeline Data
+## 运用 Transforms 处理 Pipeline 数据
 
-You can manipulate your data using the various [transforms]({{ site.baseurl }}/documentation/programming-guide/#transforms) provided in the Beam SDKs. To do this, you **apply** the trannsforms to your pipeline's `PCollection` by calling the `apply` method on each `PCollection` that you want to process and passing the desired transform object as an argument.
+你可以使用Beam SDKs提供的许多[transforms]({{ site.baseurl }}/documentation/programming-guide/#transforms) 封装你的数据.你可以对每个`PCollection` 调用 `apply` 方法，对 pipeline's 的  `PCollection` 做 transforms ， `PCollection`就是你想要处理和 transform 所需要的参数。
 
-The following code shows how to `apply` a transform to a `PCollection` of strings. The transform is a user-defined custom transform that reverses the contents of each string and outputs a new `PCollection` containing the reversed strings.
+下面的代码展示了如何对一个 `PCollection` 字符串  `apply` 一个transform。transform 是一个用户定义的自定义变换，可以反转每个字符串的内容，并输出一个包含反转字符串的新的 `PCollection`。
 
-The input is a `PCollection<String>` called `words`; the code passes an instance of a `PTransform` object called `ReverseWords` to `apply`, and saves the return value as the `PCollection<String>` called `reversedWords`.
+输入是一个叫做 `words` 的`PCollection<String>`;这个代码将一个名为`ReverseWords`的 `PTransform` 实例传递给  `apply`方法，并保存返回的 `PCollection<String>`类型的 值为  `reversedWords`。
+
 
 ```java
 PCollection<String> words = ...;
@@ -61,9 +63,10 @@ PCollection<String> reversedWords = words.apply(new ReverseWords());
 
 ## Writing or Outputting Your Final Pipeline Data
 
-Once your pipeline has applied all of its transforms, you'll usually need to output the results. To output your pipeline's final `PCollection`s, you apply a `Write` transform to that `PCollection`. `Write` transforms can output the elements of a `PCollection` to an external data sink, such as a database table. You can use `Write` to output a `PCollection` at any time in your pipeline, although you'll typically write out data at the end of your pipeline.
+一旦你的 pipeline 已经运用过了所有的 transforms，你经常需要输出结果。为了输出你的 pipeline 最后的`PCollection`s,你会对 `PCollection` 做  `Write` transform。 `Write` transform 可以输出`PCollection` 的元素到一个外部数据 sink，例如数据库表。你可以在你的 pipeline任何时候 使用 `Write`操作输出 `PCollection`，尽管你一般是在 pipeline 结束的时候写出你的数据。
 
-The following example code shows how to `apply` a `TextIO.Write` transform to write a `PCollection` of `String` to a text file:
+下面的示例代码展示了如何 `apply` 一个 `TextIO.Write` transform，将一个`String` 类型的  `PCollection`写入到一个文本文件。
+
 
 ```java
 PCollection<String> filteredWords = ...;
@@ -71,9 +74,10 @@ PCollection<String> filteredWords = ...;
 filteredWords.apply("WriteMyFile", TextIO.write().to("gs://some/outputData.txt"));
 ```
 
-## Running Your Pipeline
+## 运行你的 Pipeline
 
-Once you have constructed your pipeline, use the `run` method to execute the pipeline. Pipelines are executed asynchronously: the program you create sends a specification for your pipeline to a **pipeline runner**, which then constructs and runs the actual series of pipeline operations.
+一旦你构造好你的 pipeline,使用  `run` 方法运行 pipeline（管道）。Pipelines是异步执行的: 你创建的程序会将你的 pipeline 发送给 **pipeline runner**，然后构建并运行一系列的管道操作。
+
 
 ```java
 p.run();
@@ -85,7 +89,7 @@ The `run` method is asynchronous. If you'd like a blocking execution instead, ru
 p.run().waitUntilFinish();
 ```
 
-## What's next
+## 下一步
 
-*   [Programming Guide]({{ site.baseurl }}/documentation/programming-guide) - Learn the details of creating your pipeline, configuring pipeline options, and applying transforms.
-*   [Test your pipeline]({{ site.baseurl }}/documentation/pipelines/test-your-pipeline).
+*   [编程指南]({{ site.baseurl }}/documentation/programming-guide) - Learn the details of creating your pipeline, configuring pipeline options, and applying transforms.
+*   [测试你的 pipeline]({{ site.baseurl }}/documentation/pipelines/test-your-pipeline).
