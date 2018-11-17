@@ -3,6 +3,8 @@ rvm:
   - 2.5
 
 install:
+  - wget https://rubygems.org/downloads/json-1.8.3.gem
+  - gem install --local json-1.8.3.gem
   - gem install bundler
   - cd site/zh
   - bundle install --deployment
