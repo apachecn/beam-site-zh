@@ -4,10 +4,10 @@ rvm:
 
 install:
   - gem install bundler
+  - cd site/zh
   - bundle install --deployment
 
 script:
-  - cd site/zh
   - jekyll build
 
 after_script:
