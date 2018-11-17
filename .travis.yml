@@ -24,5 +24,5 @@ env:
     - GH_UN=jiangzhonglian
     - GH_EMAIL=jiang-s@163.com
     - GH_USER=apachecn
-    - GH_REPO=storm-doc-zh
+    - GH_REPO=beam-site-zh
     - GH_BRANCH=gh-pages
