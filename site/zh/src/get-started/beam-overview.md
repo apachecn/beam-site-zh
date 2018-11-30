@@ -1,23 +1,23 @@
 ---
 layout: default
-title: "Beam Overview"
+title: "Beam 概述"
 permalink: /get-started/beam-overview/
 redirect_from:
   - /use/beam-overview/
   - /docs/use/beam-overview/
 ---
 
-# Apache Beam Overview
+# Apache Beam 概述
 
-Apache Beam is an open source, unified model for defining both batch and streaming data-parallel processing pipelines. Using one of the open source Beam SDKs, you build a program that defines the pipeline. The pipeline is then executed by one of Beam's supported **distributed processing back-ends**, which include [Apache Apex](http://apex.apache.org), [Apache Flink](http://flink.apache.org), [Apache Spark](http://spark.apache.org), and [Google Cloud Dataflow](https://cloud.google.com/dataflow).
+Apache Beam 是一个用来定义批处理和流数据并行处理管道的开源统一模型。使用开源的Beam SDK，你就可以构建一个定义管道的程序，这个管道由Beam支持的分布式处理后端执行，其中包括[Apache Apex](http://apex.apache.org), [Apache Flink](http://flink.apache.org), [Apache Spark](http://spark.apache.org), and [Google Cloud Dataflow](https://cloud.google.com/dataflow)。
 
-Beam is particularly useful for [Embarrassingly Parallel](http://en.wikipedia.org/wiki/Embarassingly_parallel) data processing tasks, in which the problem can be decomposed into many smaller bundles of data that can be processed independently and in parallel. You can also use Beam for Extract, Transform, and Load (ETL) tasks and pure data integration. These tasks are useful for moving data between different storage media and data sources, transforming data into a more desirable format, or loading data onto a new system.
+Beam对高度并行(http://en.wikipedia.org/wiki/Embarassingly_parallel)数据处理任务特别有用，做法是将这些数据分解成许多可以独立且并行处理的小数据包。还可以使用Beam做ETL任务和纯数据集成。这些任务对于在不同的存储介质和数据源之间移动数据，将数据转换为更理想的格式，或者将数据加载到新的系统上是有用的。
 
 ## Apache Beam SDKs
+ 
+Beam提供统一的编程模型，它可以表示和转换任何大小的数据集，无论输入是来自批量数据的有限数据集，还是来自流式数据源的无限数据集。Beam SDKs使用相同的类来表示有界数据和无界数据，以及对该数据进行相同的转换。您可以使用您选择的Beam SDK构建一个定义数据处理流程的程序。
 
-The Beam SDKs provide a unified programming model that can represent and transform data sets of any size, whether the input is a finite data set from a batch data source, or an infinite data set from a streaming data source. The Beam SDKs use the same classes to represent both bounded and unbounded data, and the same transforms to operate on that data. You use the Beam SDK of your choice to build a program that defines your data processing pipeline.
-
-Beam currently supports the following language-specific SDKs:
+Beam 目前支持以下指定语言的SDKs:
 
 * Java <img src="{{ site.baseurl }}/images/logos/sdks/java.png"
          alt="Java SDK">
@@ -26,9 +26,9 @@ Beam currently supports the following language-specific SDKs:
 
 ## Apache Beam Pipeline Runners
 
-The Beam Pipeline Runners translate the data processing pipeline you define with your Beam program into the API compatible with the distributed processing back-end of your choice. When you run your Beam program, you'll need to specify an [appropriate runner]({{ site.baseurl }}/documentation/runners/capability-matrix) for the back-end where you want to execute your pipeline.
+The Beam Pipeline Runners把你用Beam程序定义的数据处理管道翻译成你选择的分部署处理后端兼容的API。您运行您的Beam程序时，您需要为执行管道的后端指定一个[合适的Runner]({{ site.baseurl }}/documentation/runners/capability-matrix)。
 
-Beam currently supports Runners that work with the following distributed processing back-ends:
+Beam 目前支持Runners可以在下面这些分布式处理后端下工作：
 
 * Apache Apex <img src="{{ site.baseurl }}/images/logos/runners/apex.png"
          alt="Apache Apex">
@@ -41,18 +41,18 @@ Beam currently supports Runners that work with the following distributed process
 * Google Cloud Dataflow <img src="{{ site.baseurl }}/images/logos/runners/dataflow.png"
          alt="Google Cloud Dataflow">
     
-**Note:** You can always execute your pipeline locally for testing and debugging purposes.
+**注意:** 您始终可以在本地执行您的pipeline用来测试和调试。
 
-## Get Started
+## 开始
 
-Get started using Beam for your data processing tasks.
+开始使用Beam做你的数据处理任务.
 
-1. Follow the Quickstart for the [Java SDK]({{ site.baseurl }}/get-started/quickstart-java) or the [Python SDK]({{ site.baseurl }}/get-started/quickstart-py).
+1. 参照快速入门 [Java SDK]({{ site.baseurl }}/get-started/quickstart-java) 或者 [Python SDK]({{ site.baseurl }}/get-started/quickstart-py).
 
-2. See the [WordCount Examples Walkthrough]({{ site.baseurl }}/get-started/wordcount-example) for examples that introduce various features of the SDKs.
+2. 理解例子[WordCount Examples Walkthrough]({{ site.baseurl }}/get-started/wordcount-example) 中介绍的SDKs的各种功能。
 
-3. Dive into the [Documentation]({{ site.baseurl }}/documentation/) section for in-depth concepts and reference materials for the Beam model, SDKs, and runners.
+3. 深入[Documentation]({{ site.baseurl }}/documentation/) 中快速翻找深入的概念和Beam模型，SDKs，Runners的参考资料。
 
-## Contribute
+## 贡献
 
-Beam is an [Apache Software Foundation](http://www.apache.org) project, available under the Apache v2 license. Beam is an open source community and contributions are greatly appreciated! If you'd like to contribute, please see the [Contribute]({{ site.baseurl }}/contribute/) section.
+Beam 是一个基于[Apache Software Foundation](http://www.apache.org) 的项目，获得了 Apache v2 license。 Beam 是一个开源社区，贡献非常值得赞赏！如果您想贡献，请参阅[贡献]({{ site.baseurl }}/contribute/)部分。

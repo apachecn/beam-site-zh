@@ -4,24 +4,24 @@ title: "Apache Spark Runner"
 permalink: /documentation/runners/spark/
 redirect_from: /learn/runners/spark/
 ---
-# Using the Apache Spark Runner
+# Apache Spark Runner的使用
 
-The Apache Spark Runner can be used to execute Beam pipelines using [Apache Spark](http://spark.apache.org/). 
-The Spark Runner can execute Spark pipelines just like a native Spark application; deploying a self-contained application for local mode, running on Spark's Standalone RM, or using YARN or Mesos.
+Apache Spark Runner可以使用[Apache Spark](http://spark.apache.org/). 来执行管道(Pipeline)。
+Spark Runner可以像本机Spark应用程序那样执行Spark管道;为本地模式部署一个自包含的应用程序，在Spark的独立RM上运行，或者使用纱线或Mesos。
 
-The Spark Runner executes Beam pipelines on top of Apache Spark, providing:
+Spark为Spark Runner执行Beam pipelines提供支持如下：
 
-* Batch and streaming (and combined) pipelines.
-* The same fault-tolerance [guarantees](http://spark.apache.org/docs/1.6.3/streaming-programming-guide.html#fault-tolerance-semantics) as provided by RDDs and DStreams.
-* The same [security](http://spark.apache.org/docs/1.6.3/security.html) features Spark provides.
-* Built-in metrics reporting using Spark's metrics system, which reports Beam Aggregators as well.
-* Native support for Beam side-inputs via spark's Broadcast variables.
+* 补丁和Streaming pipelines 或者combined pipelines;
+* 由RDDs和DStreams提供的相同的容错能力(fault-tolerance [guarantees](http://spark.apache.org/docs/1.6.3/streaming-programming-guide.html#fault-tolerance-semantics));
+* 与Spark相同的安全特性([security](http://spark.apache.org/docs/1.6.3/security.html))；
+* **Built-in metrics reporting using Spark's metrics system, which reports Beam Aggregators as well.使用Spark的度量系统的内置度量报告，它还报告Beam 聚合。**
+* 通过spark的广播变量对Beam的侧输入原生支持。
 
-The [Beam Capability Matrix]({{ site.baseurl }}/documentation/runners/capability-matrix/) documents the currently supported capabilities of the Spark Runner.
+[Beam Capability Matrix]({{ site.baseurl }}/documentation/runners/capability-matrix/)文档记录了Spark Runner当前支持的功能。
 
-_**Note:**_ _support for the Beam Model in streaming is currently experimental, follow-up in the [mailing list]({{ site.baseurl }}/get-started/support/) for status updates._
+_**注:**_支持流媒体流中的Beam模型(Beam Model)目前处于实验性阶段，请在邮件列表中跟踪状态发展。[mailing list]({{ site.baseurl }}/get-started/support/)
 
-## Spark Runner prerequisites and setup
+## Spark Runner 先决条件和设置
 
 The Spark runner currently supports Spark's 1.6 branch, and more specifically any version greater than 1.6.0.
 

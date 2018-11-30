@@ -5,91 +5,98 @@ permalink: /get-started/mobile-gaming-example/
 redirect_from: /use/mobile-gaming-example/
 ---
 
-# Apache Beam Mobile Gaming Pipeline Examples
+# Apache Beam Mobile Gaming Pipeline Examples (Apache Beam 手游管道示例)
 
 * TOC
 {:toc}
 
 <nav class="language-switcher">
-  <strong>Adapt for:</strong>
+  <strong>适用于:</strong>
   <ul>
     <li data-type="language-java">Java SDK</li>
     <li data-type="language-py">Python SDK</li>
   </ul>
 </nav>
 
-This section provides a walkthrough of a series of example Apache Beam pipelines that demonstrate more complex functionality than the basic [WordCount]({{ site.baseurl }}/get-started/wordcount-example) examples. The pipelines in this section process data from a hypothetical game that users play on their mobile phones. The pipelines demonstrate processing at increasing levels of complexity; the first pipeline, for example, shows how to run a batch analysis job to obtain relatively simple score data, while the later pipelines use Beam's windowing and triggers features to provide low-latency data analysis and more complex intelligence about user's play patterns.
+本节提供了一系列示例Apache Beam管道的演示，演示了比基本的 [WordCount]({{ site.baseurl }}/get-started/wordcount-example) 示例更复杂的功能。 本节中的管道用于处理用户在手机上玩的假想游戏的数据。管道将会在越来越复杂的情况下进行演示；这条管道显示了处理复杂性增加的过程;例如，第一个管道显示了如何运行一个批分析作业来获得相对简单的分数数据，而后面的管道则使用Beam的窗口和触发器特性来提供低延迟的数据分析和更复杂的关于用户的游戏模式的信息。
 
 {:.language-java}
-> **Note**: These examples assume some familiarity with the Beam programming model. If you haven't already, we recommend familiarizing yourself with the programming model documentation and running a basic example pipeline before continuing. Note also that these examples use the Java 8 lambda syntax, and thus require Java 8. However, you can create pipelines with equivalent functionality using Java 7.
+> **Note**: 这些示例假定您对Beam编程模型很熟悉。如果您还没有，我们建议您熟悉编程模型文档，并在继续之前运行一个基本的示例管道。还要注意的是，这些示例使用Java 8 lambda语法，因此需要Java 8。但是，您可以使用Java 7创建具有相同功能的管道。
 
 {:.language-py}
-> **Note**: These examples assume some familiarity with the Beam programming model. If you haven't already, we recommend familiarizing yourself with the programming model documentation and running a basic example pipeline before continuing.
+> **Note**: 这些示例假定您对Beam编程模型很熟悉。如果您还没有，我们建议您熟悉编程模型文档，并在继续之前运行一个基本的示例管道。
 
-Every time a user plays an instance of our hypothetical mobile game, they generate a data event. Each data event consists of the following information:
+每当用户玩我们假设的移动游戏实例时，他们就会生成一个数据事件。
+每个数据事件由以下信息组成:
 
-- The unique ID of the user playing the game.
-- The team ID for the team to which the user belongs.
-- A score value for that particular instance of play.
-- A timestamp that records when the particular instance of play happened--this is the event time for each game data event.
+- 用户玩游戏的唯一ID。
+- 每个用户所属的游戏团队的团队ID
+- 特定场合的得分值
+- 一个时间戳记录事件的特定实例发生的时间，这是每个游戏数据事件的事件时间。
 
-When the user completes an instance of the game, their phone sends the data event to a game server, where the data is logged and stored in a file. Generally the data is sent to the game server immediately upon completion. However, sometimes delays can happen in the network at various points. Another possible scenario involves users who play the game "offline", when their phones are out of contact with the server (such as on an airplane, or outside network coverage area). When the user's phone comes back into contact with the game server, the phone will send all accumulated game data. In these cases, some data events may arrive delayed and out of order.
+当用户完成游戏的一个实例时，他们的手机将数据事件发送到一个游戏服务器，在这个服务器中，数据被记录并存储在一个文件中。
+一般情况下，数据会在完成后立即发送到游戏服务器。
+然而，有时网络上的延迟会在不同的时间点发生。
+另一种可能的情况是，当用户的手机与服务器失去联系时(比如在飞机上或外部网络覆盖区域)，玩“离线”游戏的用户。
+当用户的手机回到与游戏服务器的联系时，手机会发送所有累积的游戏数据。
+在这些情况下，一些数据事件可能会无序。
 
-The following diagram shows the ideal situation (events are processed as they occur) vs. reality (there is often a time delay before processing).
+下图显示了理想的情况(事件是在发生时处理的)和现实(在处理之前通常会有一个时间延迟)。
 
 <figure id="fig1">
     <img src="{{ site.baseurl }}/images/gaming-example-basic.png"
          width="264" height="260"
          alt="Score data for three users.">
 </figure>
-**Figure 1:** The X-axis represents event time: the actual time a game event occurred. The Y-axis represents processing time: the time at which a game event was processed. Ideally, events should be processed as they occur, depicted by the dotted line in the diagram. However, in reality that is not the case and it looks more like what is depicted by the red squiggly line.
+**图 1:** x轴表示事件时间:游戏事件发生的实际时间。y轴表示处理时间:处理游戏事件的时间。理想情况下，事件应该按照图中虚线所描述的那样进行处理。然而，实际情况并非如此，它看起来更像是由红色曲线所描绘的。
 
-The data events might be received by the game server significantly later than users generate them. This time difference (called **skew**) can have processing implications for pipelines that make calculations that consider when each score was generated. Such pipelines might track scores generated during each hour of a day, for example, or they calculate the length of time that users are continuously playing the game—both of which depend on each data record's event time.
+与用户生成的数据事件相比，游戏服务器可能会收到更晚的数据事件。这个时间差 (称为 **偏差**) 可以对管道产生处理意义，这些管道可以计算每次生成的结果时考虑的计算。例如，这样的管道可以跟踪每天每小时生成的分数，或者计算用户持续地玩游戏的时间长度，这两种方法都依赖于每个数据记录的事件时间。
 
-Because some of our example pipelines use data files (like logs from the game server) as input, the event timestamp for each game might be embedded in the data--that is, it's a field in each data record. Those pipelines need to parse the event timestamp from each data record after reading it from the input file.
+因为我们的一些示例管道使用数据文件(比如来自游戏服务器的日志)作为输入，每个游戏的事件时间戳可能被嵌入到数据中——也就是说，它是每个数据记录中的一个字段。
+这些管道需要在从输入文件读取后，从每个数据记录中解析事件时间戳。
 
-For pipelines that read unbounded game data from an unbounded source, the data source sets the intrinsic [timestamp]({{ site.baseurl }}/documentation/programming-guide/#element-timestamps) for each PCollection element to the appropriate event time.
+对于从无界源读取无界游戏数据的管道，数据源将每个PCollection元素的固有 [timestamp]({{ site.baseurl }}/documentation/programming-guide/#element-timestamps) 设置为适当的事件时间。
 
-The Mobile Gaming example pipelines vary in complexity, from simple batch analysis to more complex pipelines that can perform real-time analysis and abuse detection. This section walks you through each example and demonstrates how to use Beam features like windowing and triggers to expand your pipeline's capabilites.
+移动游戏示例管道的复杂性有所不同，从简单的批处理分析到可以执行实时分析和滥用检测的更复杂的管道。 本节将引导您完成每个示例，并演示如何使用Beam功能（如窗口和触发器）来扩展管道的功能。
 
-## UserScore: Basic Score Processing in Batch
+## UserScore: 批处理的基本分数处理
 
-The `UserScore` pipeline is the simplest example for processing mobile game data. `UserScore` determines the total score per user over a finite data set (for example, one day's worth of scores stored on the game server). Pipelines like `UserScore` are best run periodically after all relevant data has been gathered. For example, `UserScore` could run as a nightly job over data gathered during that day.
+`UserScore` 管道是处理移动游戏数据的最简单的例子。 `UserScore` 决定了每个用户在有限数据集上的总得分(例如，在游戏服务器上存储了一天的分数)。在收集了所有相关数据之后，像 `UserScore` 这样的管道最好定期运行。例如，`UserScore` 可以作为夜间工作，而不是在那天收集的数据。
 
 {:.language-java}
-> **Note:** See [UserScore on GitHub](https://github.com/apache/beam/blob/master/examples/java8/src/main/java/org/apache/beam/examples/complete/game/UserScore.java) for the complete example pipeline program.
+> **Note:** 请参阅 [GitHub上的UserScore](https://github.com/apache/beam/blob/master/examples/java8/src/main/java/org/apache/beam/examples/complete/game/UserScore.java) ，以获得完整的示例管道程序。
 
 {:.language-py}
-> **Note:** See [UserScore on GitHub](https://github.com/apache/beam/blob/master/sdks/python/apache_beam/examples/complete/game/user_score.py) for the complete example pipeline program.
+> **Note:** 请参阅 [GitHub上的UserScore](https://github.com/apache/beam/blob/master/sdks/python/apache_beam/examples/complete/game/user_score.py) ，以获得完整的示例管道程序。
 
-### What Does UserScore Do?
+### UserScore 做什么工作??
 
-In a day's worth of scoring data, each user ID may have multiple records (if the user plays more than one instance of the game during the analysis window), each with their own score value and timestamp. If we want to determine the total score over all the instances a user plays during the day, our pipeline will need to group all the records together per individual user.
+在一天的得分数据中，每个用户ID可能都有多个记录(如果用户在分析窗口中玩多个游戏实例)，每个用户都有自己的得分值和时间戳。如果我们想要确定用户在一天中所扮演的所有实例的总得分，我们的管道将需要将每个用户的所有记录合并在一起。
 
-As the pipeline processes each event, the event score gets added to the sum total for that particular user.
+当管道处理每个事件时，事件得分被添加到该特定用户的总和中。
 
-`UserScore` parses out only the data that it needs from each record, specifically the user ID and the score value. The pipeline doesn't consider the event time for any record; it simply processes all data present in the input files that you specify when you run the pipeline.
+`UserScore` 只解析每个记录需要的数据，特别是用户ID和得分值。管道不会考虑任何记录的事件时间;它只处理在运行管道时指定的输入文件中的所有数据。
 
-> **Note:** To use the `UserScore` pipeline effectively, you'd need to ensure that you supply input data that has already been grouped by the desired event time period — that is, that you specify an input file that only contains data from the day you care about.
+> **Note:** 为了有效地使用 `UserScore` 管道，您需要确保您提供的输入数据已经按照所需的事件时间周期分组——也就是说，您指定的输入文件只包含您所关心的那一天的数据。
 
-`UserScore`'s basic pipeline flow does the following:
+`UserScore`的基本流程流如下:
 
-1. Read the day's score data from a text file.
-2. Sum the score values for each unique user by grouping each game event by user ID and combining the score values to get the total score for that particular user.
-3. Write the result data to a text file.
+1. 从文本文件中读取当天的得分数据。
+2. 通过用户ID对每个游戏事件进行分组，并结合得分值来获得该特定用户的总得分，从而为每个独立用户的得分值进行累加。
+3. 将结果数据写入一个文本文件。
 
-The following diagram shows score data for several users over the pipeline analysis period. In the diagram, each data point is an event that results in one user/score pair:
+下图显示了管道分析期间多个用户的分数数据。 在图中，每个数据点是一个用户/得分对的事件的结果：
 
 <figure id="fig2">
     <img src="{{ site.baseurl }}/images/gaming-example.gif"
          width="900" height="263"
          alt="Score data for three users.">
 </figure>
-**Figure 2:** Score data for three users.
+**图 2:** 三个用户的得分数据。
 
-This example uses batch processing, and the diagram's Y axis represents processing time: the pipeline processes events lower on the Y-axis first, and events higher up the axis later. The diagram's X axis represents the event time for each game event, as denoted by that event's timestamp. Note that the individual events in the diagram are not processed by the pipeline in the same order as they occurred (according to their timestamps).
+这个例子使用批处理，而图的Y轴表示处理时间:管道处理事件在Y轴上的时间越低，后面的事件就越高。图的X轴表示每个游戏事件的事件时间，由该事件的时间戳表示。请注意，图中的个别事件并不是按照它们发生的顺序处理的(根据它们的时间戳)。
 
-After reading the score events from the input file, the pipeline groups all of those user/score pairs together and sums the score values into one total value per unique user. `UserScore` encapsulates the core logic for that step as the [user-defined composite transform]({{ site.baseurl }}/documentation/programming-guide/#composite-transforms) `ExtractAndSumScore`:
+在从输入文件读取分数事件之后，管道将所有这些用户/分数对组合在一起，并将得分值计算为每个惟一用户的总值。 `UserScore` 封装了该步骤的核心逻辑，即[用户定义的复合转换]({{ site.baseurl }}/documentation/programming-guide/#composite-transforms) `ExtractAndSumScore`:
 
 ```java
 {% github_sample /apache/beam/blob/master/examples/java8/src/main/java/org/apache/beam/examples/complete/game/UserScore.java tag:DocInclude_USExtractXform
@@ -98,9 +105,9 @@ After reading the score events from the input file, the pipeline groups all of t
 {% github_sample /apache/beam/blob/master/sdks/python/apache_beam/examples/complete/game/user_score.py tag:extract_and_sum_score
 %}```
 
-`ExtractAndSumScore` is written to be more general, in that you can pass in the field by which you want to group the data (in the case of our game, by unique user or unique team). This means we can re-use `ExtractAndSumScore` in other pipelines that group score data by team, for example.
+`ExtractAndSumScore` 写得更为概括，因为你可以通过自己想要数据的字段进行分组(在我们的游戏中，由唯一的用户或唯一的团队)。 这意味着我们可以在其他管道中重新使用`ExtractAndSumScore`，例如，通过团队对比分数据进行分组。
 
-Here's the main method of `UserScore`, showing how we apply all three steps of the pipeline:
+下面是UserScore的主要方法，展示了我们如何应用这三个步骤:
 
 ```java
 {% github_sample /apache/beam/blob/master/examples/java8/src/main/java/org/apache/beam/examples/complete/game/UserScore.java tag:DocInclude_USMain
@@ -109,68 +116,67 @@ Here's the main method of `UserScore`, showing how we apply all three steps of t
 {% github_sample /apache/beam/blob/master/sdks/python/apache_beam/examples/complete/game/user_score.py tag:main
 %}```
 
-### Limitations
+### Limitations(局限性)
 
-As written in the example, the `UserScore` pipeline has a few limitations:
+正如在示例中所写的， `UserScore` 管道有一些限制:
 
-* Because some score data may be generated by offline players and sent after the daily cutoff, for game data, the result data generated by the `UserScore` pipeline **may be incomplete**. `UserScore` only processes the fixed input set present in the input file(s) when the pipeline runs.
+* 因为一些分数数据可能是由离线玩家生成的，并且在每日中断之后发送，对于游戏数据，由`UserScore` 管道生成的结果数据可能是 **不完整的**. 当管道运行时，`UserScore` 只处理输入文件(多个)中存在的固定输入集。
 
-* `UserScore` processes all data events present in the input file at processing time, and **does not examine or otherwise error-check events based on event time**. Therefore, the results may include some values whose event times fall outside the relevant analysis period, such as late records from the previous day.
+* `UserScore` 在处理时间处理输入文件中存在的所有数据事件，并且 **不会根据事件时间检查或以其他方式错误检查事件**。 因此，结果可能包括某些值，其事件时间不在相关分析期间，例如前一天的延迟记录。
 
-* Because `UserScore` runs only after all the data has been collected, it has **high latency** between when users generate data events (the event time) and when results are computed (the processing time).
+* 因为 `UserScore` 仅在收集所有数据之后运行，所以在用户生成数据事件（事件时间）和计算结果（处理时间）之间时，它具有 **很高的延迟**。 
 
-* `UserScore` also only reports the total results for the entire day, and doesn't provide any finer-grained information about how the data accumulated during the day.
+* `UserScore` 还仅报告整天的总体结果，并且不提供有关如何在白天累积的数据的更细粒度的信息。
 
-Starting with the next pipeline example, we'll discuss how you can use Beam's features to address these limitations.
+从下一个流程示例开始，我们将讨论如何使用Beam的功能来解决这些限制。
 
-## HourlyTeamScore: Advanced Processing in Batch with Windowing
+## HourlyTeamScore: 使用窗口进行的高级处理——批处理
 
-The `HourlyTeamScore` pipeline expands on the basic batch analysis principles used in the `UserScore` pipeline and improves upon some of its limitations. `HourlyTeamScore` performs finer-grained analysis, both by using additional features in the Beam SDKs, and taking into account more aspects of the game data. For example, `HourlyTeamScore` can filter out data that isn't part of the relevant analysis period.
+ `HourlyTeamScore` 管道扩展了 `UserScore` 管道中使用的基本批次分析原则，并改进了其一些限制。 `HourlyTeamScore` 通过在 Beam SDKs中使用其他功能，并考虑到游戏数据的更多方面，进行细化分析。 例如， `HourlyTeamScore` 可以过滤掉不属于相关分析期的数据。
 
-Like `UserScore`, `HourlyTeamScore` is best thought of as a job to be run periodically after all the relevant data has been gathered (such as once per day). The pipeline reads a fixed data set from a file, and writes the results to a Google Cloud BigQuery table.
+像 `UserScore`一样，`HourlyTeamScore` 最好被认为是在收集所有相关数据后定期运行（例如每天一次）的工作。 管道从文件读取固定数据集，并将结果写入Google Cloud BigQuery表。
 
 {:.language-java}
-> **Note:** See [HourlyTeamScore on GitHub](https://github.com/apache/beam/blob/master/examples/java8/src/main/java/org/apache/beam/examples/complete/game/HourlyTeamScore.java) for the complete example pipeline program.
+> **Note:** 完整的示例管道程序请查看 [HourlyTeamScore on GitHub](https://github.com/apache/beam/blob/master/examples/java8/src/main/java/org/apache/beam/examples/complete/game/HourlyTeamScore.java)
 
 {:.language-py}
-> **Note:** See [HourlyTeamScore on GitHub](https://github.com/apache/beam/blob/master/sdks/python/apache_beam/examples/complete/game/hourly_team_score.py) for the complete example pipeline program.
+> **Note:** 完整的示例管道程序请查看 [HourlyTeamScore on GitHub](https://github.com/apache/beam/blob/master/sdks/python/apache_beam/examples/complete/game/hourly_team_score.py) 
+### HourlyTeamScore做什么？
 
-### What Does HourlyTeamScore Do?
+`HourlyTeamScore` 计算固定数据集中每个团队每小时的总分数（如一天的数据）。
 
-`HourlyTeamScore` calculates the total score per team, per hour, in a fixed data set (such as one day's worth of data).
+*  `HourlyTeamScore` 不是一次对整个数据集进行操作，而是将输入数据分成逻辑窗口，并在这些窗口上执行计算。 这可以让 `HourlyUserScore` 提供每个窗口评分数据的信息，其中每个窗口以固定的时间间隔（如每小时一次）表示游戏得分进度。
 
-* Rather than operating on the entire data set at once, `HourlyTeamScore` divides the input data into logical windows and performs calculations on those windows. This allows `HourlyUserScore` to provide information on scoring data per window, where each window represents the game score progress at fixed intervals in time (like once every hour).
+* `HourlyTeamScore` 根据其事件时间（嵌入的时间戳）是否在相关分析期内进行数据事件过滤。 基本上，管道检查每个游戏事件的时间戳，并确保它落在我们想要分析的范围内（在这种情况下是所讨论的日子）。 前几天的数据事件被丢弃，不包括在总分中。 这使得`HourlyTeamScore` 更加强大，并且比 `UserScore`. 更不容易出现错误的结果数据。 在分析期间它还允许管道去计算带着时间戳的迟到数据。
 
-* `HourlyTeamScore` filters data events based on whether their event time (as indicated by the embedded timestamp) falls within the relevant analysis period. Basically, the pipeline checks each game event's timestamp and ensures that it falls within the range we want to analyze (in this case the day in question). Data events from previous days are discarded and not included in the score totals. This makes `HourlyTeamScore` more robust and less prone to erroneous result data than `UserScore`. It also allows the pipeline to account for late-arriving data that has a timestamp within the relevant analysis period.
+下面我们将详细介绍 `HourlyTeamScore` 中的这些增强功能：
 
-Below, we'll look at each of these enhancements in `HourlyTeamScore` in detail:
+#### 固定时间窗口
 
-#### Fixed-Time Windowing
+使用固定时间窗口使管道能够提供关于在分析期间的数据集内累积的事件的更好的信息。在我们的例子中，它告诉我们，每个团队在一天中是活跃的，团队在那个时候的得分是多少。
 
-Using fixed-time windowing lets the pipeline provide better information on how events accumulated in the data set over the course of the analysis period. In our case, it tells us when in the day each team was active and how much the team scored at those times.
-
-The following diagram shows how the pipeline processes a day's worth of a single team's scoring data after applying fixed-time windowing:
+下图显示了在应用固定时间窗口后，管道如何处理一天的单个团队的得分数据:
 
 <figure id="fig3">
     <img src="{{ site.baseurl }}/images/gaming-example-team-scores-narrow.gif"
          width="900" height="390"
          alt="Score data for two teams.">
 </figure>
-**Figure 3:** Score data for two teams. Each team's scores are divided into logical windows based on when those scores occurred in event time.
+**图 3:** 为两队得分数据。基于事件发生时的得分每个团队的分数被划分为逻辑窗口。
 
-Notice that as processing time advances, the sums are now _per window_; each window represents an hour of _event time_ during the day in which the scores occurred.
+注意，随着处理时间的推移，现在的总和是每个窗口的总和；每个窗口表示分数发生的当天的一小时的事件时间。
 
-> **Note:** As is shown in the diagram above, using windowing produces an _independent total for every interval_ (in this case, each hour). `HourlyTeamScore` doesn't provide a running total for the entire data set at each hour--it provides the total score for all the events that occurred _only within that hour_.
+> **Note:** 如上图所示，使用窗口可以为每个间隔（在这种情况下每个小时）产生一个独立的总和。`HourlyTeamScore` 如上图所示，使用窗口可以为每个间隔（在这种情况下每个小时）产生一个独立的总和。
 
-Beam's windowing feature uses the [intrinsic timestamp information]({{ site.baseurl }}/documentation/programming-guide/#element-timestamps) attached to each element of a `PCollection`. Because we want our pipeline to window based on _event time_, we **must first extract the timestamp** that's embedded in each data record apply it to the corresponding element in the `PCollection` of score data. Then, the pipeline can **apply the windowing function** to divide the `PCollection` into logical windows.
+Beam的窗口特性使用了与`PCollection`的每个元素相关联的 [固有时间戳信息]({{ site.baseurl }}/documentation/programming-guide/#element-timestamps) 。 因为我们希望我们的管道基于事件时间窗口，所以我们必须**首先提取嵌入在每个数据记录中的时间戳**，将其应用到得分数据的 `PCollection` 中相应的元素。然后，管道可以 **应用窗口功能** 将 `PCollection` 划分为逻辑窗口。
 
 {:.language-java}
-`HourlyTeamScore` uses the [WithTimestamps](https://github.com/apache/beam/blob/master/sdks/java/core/src/main/java/org/apache/beam/sdk/transforms/WithTimestamps.java) and [Window](https://github.com/apache/beam/blob/master/sdks/java/core/src/main/java/org/apache/beam/sdk/transforms/windowing/Window.java) transforms to perform these operations.
+`HourlyTeamScore` 使用 [WithTimestamps](https://github.com/apache/beam/blob/master/sdks/java/core/src/main/java/org/apache/beam/sdk/transforms/WithTimestamps.java) 和 [Window](https://github.com/apache/beam/blob/master/sdks/java/core/src/main/java/org/apache/beam/sdk/transforms/windowing/Window.java) 转换去展示这些操作。
 
 {:.language-py}
-`HourlyTeamScore` uses the `FixedWindows` transform, found in [window.py](https://github.com/apache/beam/blob/master/sdks/python/apache_beam/transforms/window.py), to perform these operations.
+`HourlyTeamScore` 使用 `FixedWindows` 转换（可以在 [window.py](https://github.com/apache/beam/blob/master/sdks/python/apache_beam/transforms/window.py)中找到）去展示这些操作。
 
-The following code shows this:
+以下代码显示：
 
 ```java
 {% github_sample /apache/beam/blob/master/examples/java8/src/main/java/org/apache/beam/examples/complete/game/HourlyTeamScore.java tag:DocInclude_HTSAddTsAndWindow
@@ -179,17 +185,17 @@ The following code shows this:
 {% github_sample /apache/beam/blob/master/sdks/python/apache_beam/examples/complete/game/hourly_team_score.py tag:add_timestamp_and_window
 %}```
 
-Notice that the transforms the pipeline uses to specify the windowing are distinct from the actual data processing transforms (such as `ExtractAndSumScores`). This functionality provides you some flexibility in designing your Beam pipeline, in that you can run existing transforms over datasets with different windowing characteristics.
+请注意，管道用于指定窗口的变换与实际数据处理转换（如 `ExtractAndSumScores` ）不同。 此功能为您设计Beam管道提供了一些灵活性，您可以在具有不同窗口特征的数据集上运行现有转换。
 
-#### Filtering Based On Event Time
+#### 基于事件时间过滤
 
-`HourlyTeamScore` uses **filtering** to remove any events from our dataset whose timestamps don't fall within the relevant analysis period (i.e. they weren't generated during the day that we're interested in). This keeps the pipeline from erroneously including any data that was, for example, generated offline during the previous day but sent to the game server during the current day.
+`HourlyTeamScore`使用 **过滤** 功能从我们的数据集中删除任何事件，这些事件的时间戳不会在相关的分析期间发生(也就是说，它们不是在我们感兴趣的那一天生成的)。这使得管道不被错误地包括任何数据，例如，在前一天离线生成的数据，但是在当天被发送到游戏服务器。
 
-It also lets the pipeline include relevant **late data**—data events with valid timestamps, but that arrived after our analysis period ended. If our pipeline cutoff time is 12:00 am, for example, we might run the pipeline at 2:00 am, but filter out any events whose timestamps indicate that they occurred after the 12:00 am cutoff. Data events that were delayed and arrived between 12:01 am and 2:00 am, but whose timestamps indicate that they occurred before the 12:00 am cutoff, would be included in the pipeline processing.
+它还允许管道包含有有效时间戳的相关 **延迟数据** 事件，但是这些数据在我们的分析期结束后到达的。例如，如果我们的管道截止时间是12:00 am，我们可能在 2:00 am点运行管道，但是过滤出时间戳表示在12:00之后发生的事件。数据事件在12:01 am和2:00 am之间延迟到达，但其时间戳表示它们在12:00 am截止之前发生，将被包括在流水线处理中。	
 
-`HourlyTeamScore` uses the `Filter` transform to perform this operation. When you apply `Filter`, you specify a predicate to which each data record is compared. Data records that pass the comparison are included, while events that fail the comparison are excluded. In our case, the predicate is the cut-off time we specify, and we compare just one part of the data—the timestamp field.
+`HourlyTeamScore` 使用 `Filter` 转换来执行此操作。当您使用 `Filter` 时，您将指定一个字段，该字段将对每个数据记录进行比较。通过比较的数据记录被包括进来，而不能通过比较的事件被排除在外。在我们的例子中，字段是我们指定的截止时间，我们只比较数据时间戳字段的一个部分。
 
-The following code shows how `HourlyTeamScore` uses the `Filter` transform to filter events that occur either before or after the relevant analysis period:
+以下代码显示了 `HourlyTeamScore` 如何使用 `过滤器` 转换过滤在相关分析期之前或之后发生的事件：
 
 ```java
 {% github_sample /apache/beam/blob/master/examples/java8/src/main/java/org/apache/beam/examples/complete/game/HourlyTeamScore.java tag:DocInclude_HTSFilters
@@ -198,9 +204,9 @@ The following code shows how `HourlyTeamScore` uses the `Filter` transform to fi
 {% github_sample /apache/beam/blob/master/sdks/python/apache_beam/examples/complete/game/hourly_team_score.py tag:filter_by_time_range
 %}```
 
-#### Calculating Score Per Team, Per Window
+#### 每个窗口计算每队的得分
 
-`HourlyTeamScore` uses the same `ExtractAndSumScores` transform as the `UserScore` pipeline, but passes a different key (team, as opposed to user). Also, because the pipeline applies `ExtractAndSumScores` _after_ applying fixed-time 1-hour windowing to the input data, the data gets grouped by both team _and_ window. You can see the full sequence of transforms in `HourlyTeamScore`'s main method:
+`HourlyTeamScore` 使用与 `UserScore` 管道相同的 `ExtractAndSumScores` 转换，但传递不同的key（团队，而不是用户）。此外，由于管道在应用固定时间1小时窗口的输入数据后使用`ExtractAndSumScores`，因此数据被团队和窗口分组。您可以在`HourlyTeamScore` 的主要方法中看到完整的变换序列：
 
 ```java
 {% github_sample /apache/beam/blob/master/examples/java8/src/main/java/org/apache/beam/examples/complete/game/HourlyTeamScore.java tag:DocInclude_HTSMain
@@ -209,11 +215,11 @@ The following code shows how `HourlyTeamScore` uses the `Filter` transform to fi
 {% github_sample /apache/beam/blob/master/sdks/python/apache_beam/examples/complete/game/hourly_team_score.py tag:main
 %}```
 
-### Limitations
+### 限制
 
-As written, `HourlyTeamScore` still has a limitation:
+正如上面所写的，`HourlyTeamScore` 仍然有一个限制：
 
-* `HourlyTeamScore` still has **high latency** between when data events occur (the event time) and when results are generated (the processing time), because, as a batch pipeline, it needs to wait to begin processing until all data events are present.
+* `HourlyTeamScore` 在数据事件发生（事件时间）和结果生成时间（处理时间）之间仍然具有 **高延迟** ，因为作为批处理流程，需要等待开始处理，直到出现所有数据事件。
 
 ## LeaderBoard: Streaming Processing with Real-Time Game Data
 
